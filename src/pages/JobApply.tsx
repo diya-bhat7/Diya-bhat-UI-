@@ -92,12 +92,19 @@ export default function JobApply() {
 
         setSubmitting(true);
         try {
-            // 1. Upload Resume
+            // 1. Ensure 'resumes' bucket exists (creates if missing)
+            const { data: buckets } = await supabase.storage.listBuckets();
+            const bucketExists = buckets?.some(b => b.name === 'resumes');
+            if (!bucketExists) {
+                await supabase.storage.createBucket('resumes', { public: true });
+            }
+
+            // 2. Upload Resume
             const fileExt = file.name.split('.').pop();
             const fileName = `${positionId}/${Date.now()}.${fileExt}`;
             const { error: uploadError } = await supabase.storage
                 .from('resumes')
-                .upload(fileName, file);
+                .upload(fileName, file, { upsert: true });
 
             if (uploadError) throw uploadError;
 
