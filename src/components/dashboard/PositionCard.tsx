@@ -58,20 +58,27 @@ export function PositionCard({ position, onEdit, candidateCount }: PositionCardP
     const [jdOpen, setJdOpen] = useState(false);
     const [prepOpen, setPrepOpen] = useState(false);
 
-    // Prefetch candidates when hovering over a position card
+    // Prefetch candidates only if they are not already in cache and fresh
     const prefetchCandidates = () => {
-        queryClient.prefetchQuery({
-            queryKey: candidateKeys.list(position.id),
-            queryFn: async () => {
-                const { data } = await supabase
-                    .from('candidates')
-                    .select('*')
-                    .eq('position_id', position.id)
-                    .order('created_at', { ascending: false });
-                return data || [];
-            },
-            staleTime: 1000 * 60 * 5, // 5 minutes
-        });
+        const queryState = queryClient.getQueryState(candidateKeys.list(position.id));
+        // Only prefetch if we don't have data or it's older than 5 minutes
+        if (!queryState || (Date.now() - queryState.dataUpdatedAt > 1000 * 60 * 5)) {
+            queryClient.prefetchQuery({
+                queryKey: candidateKeys.list(position.id),
+                queryFn: async () => {
+                    const { data } = await supabase
+                        .from('candidates')
+                        .select('*')
+                        .eq('position_id', position.id)
+                        .order('created_at', { ascending: false });
+                    return (data || []).map(record => ({
+                        ...record,
+                        status: record.status as any,
+                    }));
+                },
+                staleTime: 1000 * 60 * 5,
+            });
+        }
     };
 
     return (

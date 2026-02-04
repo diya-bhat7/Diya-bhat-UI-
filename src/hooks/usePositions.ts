@@ -37,7 +37,6 @@ export function usePositions() {
             return data as Position[];
         },
         enabled: !!company,
-        staleTime: 1000 * 60 * 5, // 5 minutes
     });
 }
 
@@ -60,7 +59,6 @@ export function usePosition(id: string | undefined) {
             return data as Position;
         },
         enabled: !!id,
-        staleTime: 1000 * 60 * 5,
     });
 }
 

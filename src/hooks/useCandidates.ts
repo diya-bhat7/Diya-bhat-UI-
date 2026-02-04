@@ -52,7 +52,7 @@ export function useCandidateCounts() {
             });
             return counts;
         },
-        staleTime: 1000 * 60 * 2, // 2 minutes
+        staleTime: 1000 * 20, // 20 seconds for fresher counts on dashboard
     });
 }
 
@@ -71,7 +71,6 @@ export function useAllCandidates() {
             if (error) throw error;
             return (data || []).map(mapToCandidate);
         },
-        staleTime: 1000 * 60 * 2, // 2 minutes
     });
 }
 
@@ -112,7 +111,6 @@ export function useCandidates(positionId: string | undefined) {
             return (data || []).map(mapToCandidate);
         },
         enabled: !!positionId,
-        staleTime: 1000 * 60 * 5, // 5 minutes
     });
 }
 
