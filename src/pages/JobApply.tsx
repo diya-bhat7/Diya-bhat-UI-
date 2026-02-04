@@ -92,21 +92,19 @@ export default function JobApply() {
 
         setSubmitting(true);
         try {
-            // 1. Ensure 'resumes' bucket exists (creates if missing)
-            const { data: buckets } = await supabase.storage.listBuckets();
-            const bucketExists = buckets?.some(b => b.name === 'resumes');
-            if (!bucketExists) {
-                await supabase.storage.createBucket('resumes', { public: true });
-            }
-
-            // 2. Upload Resume
+            // 1. Upload Resume to 'resumes' bucket
             const fileExt = file.name.split('.').pop();
             const fileName = `${positionId}/${Date.now()}.${fileExt}`;
             const { error: uploadError } = await supabase.storage
                 .from('resumes')
                 .upload(fileName, file, { upsert: true });
 
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+                if (uploadError.message.includes('Bucket not found')) {
+                    throw new Error('Resume storage is not configured. Please contact the administrator.');
+                }
+                throw uploadError;
+            }
 
             const { data: { publicUrl } } = supabase.storage
                 .from('resumes')
