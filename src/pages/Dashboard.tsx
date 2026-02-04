@@ -9,8 +9,7 @@ import { Header } from '@/components/layout/Header';
 import { PositionCard } from '@/components/dashboard/PositionCard';
 import { PositionCardSkeletonGrid } from '@/components/dashboard/PositionCardSkeleton';
 import { PositionFilters, PositionFiltersState } from '@/components/dashboard/PositionFilters';
-import { AnalyticsCards } from '@/components/dashboard/AnalyticsCards';
-import { HiringPipeline } from '@/components/dashboard/HiringPipeline';
+import { AnalyticsDashboard } from '@/components/dashboard/AnalyticsDashboard';
 import { PositionsByCategory } from '@/components/dashboard/PositionsByCategory';
 import { QuickStats } from '@/components/dashboard/QuickStats';
 import { Button } from '@/components/ui/button';
@@ -184,12 +183,8 @@ export default function Dashboard() {
                 </div>
 
                 {showAnalytics && !positionsLoading && positions.length > 0 && (
-                    <div className="space-y-6 mb-8 animate-fade-in">
-                        <AnalyticsCards positions={positions} />
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <HiringPipeline positions={positions} />
-                            <PositionsByCategory positions={positions} />
-                        </div>
+                    <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <AnalyticsDashboard />
                     </div>
                 )}
 
