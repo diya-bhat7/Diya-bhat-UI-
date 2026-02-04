@@ -121,6 +121,20 @@ export default function JobApply() {
 
             if (insertError) throw insertError;
 
+            // 3. Notify Company Owner
+            if (company.user_id) {
+                await (supabase as any)
+                    .from('app_notifications')
+                    .insert({
+                        user_id: company.user_id,
+                        title: "New Application Received! 🚀",
+                        message: `${formData.name} applied for the ${position.position_name} position.`,
+                        type: 'success',
+                        action_url: `/positions/${position.id}/candidates`,
+                        read: false
+                    });
+            }
+
             setSubmitted(true);
             toast({
                 title: "Application Submitted!",
