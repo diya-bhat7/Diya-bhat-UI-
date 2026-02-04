@@ -18,6 +18,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { candidateKeys } from '@/hooks/useCandidates';
 import { supabase } from '@/integrations/supabase/client';
 import { LastUpdated } from '@/components/ui/RelativeTime';
+import { useState } from 'react';
+import { DocumentPreview } from '@/components/ui/DocumentPreview';
+import { FileText, Sparkles, Download } from 'lucide-react';
 
 type Position = Tables<'positions'>;
 
@@ -52,6 +55,8 @@ const categoryIcons: Record<string, string> = {
 export function PositionCard({ position, onEdit, candidateCount }: PositionCardProps) {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const [jdOpen, setJdOpen] = useState(false);
+    const [prepOpen, setPrepOpen] = useState(false);
 
     // Prefetch candidates when hovering over a position card
     const prefetchCandidates = () => {
@@ -149,34 +154,94 @@ export function PositionCard({ position, onEdit, candidateCount }: PositionCardP
                 )}
             </CardContent>
 
-            <CardFooter className="pt-3 border-t flex items-center gap-2">
-                {position.updated_at && (
-                    <LastUpdated date={position.updated_at} className="text-muted-foreground" />
-                )}
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="group-hover:bg-blue-500/10 transition-colors text-blue-600"
-                    onClick={() => navigate(`/positions/${position.id}/candidates`)}
-                >
-                    <UserSearch className="h-4 w-4 mr-2" />
-                    Candidates
-                    {candidateCount !== undefined && candidateCount > 0 && (
-                        <span className="ml-1.5 px-1.5 py-0.5 text-xs font-semibold bg-blue-500/20 rounded-full">
-                            {candidateCount}
-                        </span>
+            <CardFooter className="pt-3 border-t flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2 mr-auto">
+                    {position.updated_at && (
+                        <LastUpdated date={position.updated_at} className="text-muted-foreground mr-2" />
                     )}
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="ml-auto group-hover:bg-primary/10 transition-colors"
-                    onClick={() => onEdit(position)}
-                >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                </Button>
+                </div>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                    {position.generated_jd && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-[11px] gap-1.5 border-primary/20 hover:bg-primary/5 hover:border-primary/50"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setJdOpen(true);
+                            }}
+                        >
+                            <FileText className="h-3.5 w-3.5 text-primary" />
+                            JD
+                        </Button>
+                    )}
+
+                    {position.interview_prep_doc && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-[11px] gap-1.5 border-amber-200 hover:bg-amber-50 hover:border-amber-400"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setPrepOpen(true);
+                            }}
+                        >
+                            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                            Prep
+                        </Button>
+                    )}
+
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 text-[11px] group-hover:bg-blue-500/10 transition-colors text-blue-600"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/positions/${position.id}/candidates`);
+                        }}
+                    >
+                        <UserSearch className="h-3.5 w-3.5 mr-1" />
+                        Candidates
+                        {candidateCount !== undefined && candidateCount > 0 && (
+                            <span className="ml-1 px-1.5 py-0.5 text-[10px] font-semibold bg-blue-500/20 rounded-full">
+                                {candidateCount}
+                            </span>
+                        )}
+                    </Button>
+
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 group-hover:bg-primary/10 transition-colors"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit(position);
+                        }}
+                    >
+                        <Edit className="h-3.5 w-3.5" />
+                    </Button>
+                </div>
             </CardFooter>
+
+            {/* Document Previews */}
+            {position.generated_jd && (
+                <DocumentPreview
+                    open={jdOpen}
+                    onOpenChange={setJdOpen}
+                    title={`${position.position_name} - Job Description`}
+                    content={position.generated_jd}
+                />
+            )}
+
+            {position.interview_prep_doc && (
+                <DocumentPreview
+                    open={prepOpen}
+                    onOpenChange={setPrepOpen}
+                    title={`${position.position_name} - Interview Preparation`}
+                    content={position.interview_prep_doc}
+                />
+            )}
         </Card>
     );
 }
