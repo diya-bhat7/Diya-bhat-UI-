@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom'; // Basic routes
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft, Upload, CheckCircle2, FileText, Send, User, Mail, Phone, Link as LinkIcon } from 'lucide-react';
+import { Loader2, ArrowLeft, Upload, CheckCircle2, FileText, Send, User, Mail, Phone, Link as LinkIcon, MapPin, Building2 } from 'lucide-react';
 import { StraatixLogo } from '@/components/ui/StraatixLogo';
 import { DocumentPreview } from '@/components/ui/DocumentPreview';
 import { cn } from '@/lib/utils';
