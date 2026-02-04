@@ -20,6 +20,8 @@ const PositionCreate = lazy(() => import("./pages/PositionCreate"));
 const PositionEdit = lazy(() => import("./pages/PositionEdit"));
 const Candidates = lazy(() => import("./pages/Candidates"));
 const AllCandidates = lazy(() => import("./pages/AllCandidates"));
+const Careers = lazy(() => import("./pages/Careers"));
+const JobApply = lazy(() => import("./pages/JobApply"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Index = lazy(() => import("./pages/Index"));
 
@@ -68,6 +70,11 @@ const App = () => (
                     <Route path="/positions/:id/edit" element={<PositionEdit />} />
                     <Route path="/positions/:positionId/candidates" element={<Candidates />} />
                     <Route path="/candidates" element={<AllCandidates />} />
+
+                    {/* Public Routes */}
+                    <Route path="/careers/:companyId" element={<Careers />} />
+                    <Route path="/apply/:positionId" element={<JobApply />} />
+
                     {/* Legacy route */}
                     <Route path="/form" element={<Index />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

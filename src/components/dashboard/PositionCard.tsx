@@ -10,8 +10,12 @@ import {
     Clock,
     Edit,
     Building2,
-    UserSearch
+    UserSearch,
+    Link,
+    Share2,
+    Check
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -21,6 +25,7 @@ import { LastUpdated } from '@/components/ui/RelativeTime';
 import { useState } from 'react';
 import { DocumentPreview } from '@/components/ui/DocumentPreview';
 import { FileText, Sparkles, Download } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type Position = Tables<'positions'>;
 
@@ -57,6 +62,20 @@ export function PositionCard({ position, onEdit, candidateCount }: PositionCardP
     const queryClient = useQueryClient();
     const [jdOpen, setJdOpen] = useState(false);
     const [prepOpen, setPrepOpen] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const { toast } = useToast();
+
+    const handleCopyLink = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const shareUrl = `${window.location.origin}/apply/${position.id}`;
+        navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        toast({
+            title: "Link Copied!",
+            description: "You can now share this job link with candidates.",
+        });
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     // Prefetch candidates only if they are not already in cache and fresh
     const prefetchCandidates = () => {
@@ -198,6 +217,19 @@ export function PositionCard({ position, onEdit, candidateCount }: PositionCardP
                             Prep
                         </Button>
                     )}
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className={cn(
+                            "h-8 text-[11px] gap-1.5 transition-all duration-300",
+                            copied ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "hover:bg-primary/5 border-primary/10"
+                        )}
+                        onClick={handleCopyLink}
+                    >
+                        {copied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
+                        {copied ? "Copied" : "Share"}
+                    </Button>
 
                     <Button
                         variant="ghost"
