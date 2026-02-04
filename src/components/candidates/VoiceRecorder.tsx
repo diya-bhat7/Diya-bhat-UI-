@@ -43,22 +43,25 @@ export function VoiceRecorder({ candidateId, onSave, onCancel }: VoiceRecorderPr
             audioChunksRef.current = [];
 
             recorder.ondataavailable = (e) => {
+                console.log("Audio data available chunk size:", e.data.size);
                 if (e.data.size > 0) {
                     audioChunksRef.current.push(e.data);
                 }
             };
 
             recorder.onstop = () => {
-                const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                console.log("Recording stopped. Total chunks:", audioChunksRef.current.length);
+                const blob = new Blob(audioChunksRef.current, { type: 'audio/webm;codecs=opus' });
                 const url = URL.createObjectURL(blob);
                 setAudioBlob(blob);
                 setRecordedUrl(url);
                 stream.getTracks().forEach(track => track.stop());
             };
 
-            recorder.start();
+            recorder.start(1000); // Capture data every second
             setIsRecording(true);
             setDuration(0);
+            console.log("Recording started...");
             timerRef.current = setInterval(() => {
                 setDuration(prev => prev + 1);
             }, 1000);

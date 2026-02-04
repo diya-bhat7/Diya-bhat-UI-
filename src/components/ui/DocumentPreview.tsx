@@ -136,48 +136,78 @@ export function DocumentPreview({
                 </DialogHeader>
 
                 {/* Document Content */}
-                <ScrollArea className="flex-1 max-h-[50vh]">
-                    <div className="px-6 py-4">
-                        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg border p-6 space-y-4" style={{ fontFamily: 'Archivo, sans-serif' }}>
-                            {sections.map((section, index) => {
-                                if (section.type === 'heading') {
+                <ScrollArea className="flex-1 bg-muted/30">
+                    <div className="px-10 py-12 flex justify-center">
+                        <div
+                            className="bg-white text-gray-900 shadow-2xl rounded-none border-t-[6px] border-t-primary w-full max-w-2xl min-h-[60vh] p-12 space-y-8 relative overflow-hidden"
+                            style={{
+                                fontFamily: 'Archivo, sans-serif',
+                                boxShadow: '0 20px 50px rgba(0,0,0,0.1)'
+                            }}
+                        >
+                            {/* Watermark/Letterhead Background */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] rotate-[-45deg] pointer-events-none select-none">
+                                <span className="text-8xl font-black uppercase tracking-[1em]">Straatix</span>
+                            </div>
+
+                            {/* Letterhead */}
+                            <div className="flex justify-between items-start border-b-2 border-primary/10 pb-8 mb-4">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <div className="h-6 w-6 rounded flex items-center justify-center bg-primary text-white">
+                                            <FileText className="h-4 w-4" />
+                                        </div>
+                                        <span className="font-bold uppercase tracking-widest text-sm text-primary">Straatix Partners</span>
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Professional Recruitment Platform</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Document Generated</p>
+                                    <p className="text-xs font-bold">{new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6 relative z-10">
+                                {sections.map((section, index) => {
+                                    if (section.type === 'heading') {
+                                        return (
+                                            <h2
+                                                key={index}
+                                                className="text-lg font-bold text-foreground border-b pb-2 pt-2 first:pt-0"
+                                            >
+                                                {section.content}
+                                            </h2>
+                                        );
+                                    }
+                                    if (section.type === 'subheading') {
+                                        return (
+                                            <h3 key={index} className="text-md font-semibold text-foreground pt-2">
+                                                {section.content}
+                                            </h3>
+                                        );
+                                    }
+                                    if (section.type === 'list') {
+                                        return (
+                                            <ul key={index} className="space-y-1.5 pl-1">
+                                                {section.content.split('\n').map((item, itemIndex) => (
+                                                    <li
+                                                        key={itemIndex}
+                                                        className="flex items-start gap-2 text-sm text-muted-foreground"
+                                                    >
+                                                        <span className="text-primary mt-1.5 h-1.5 w-1.5 rounded-full bg-current shrink-0" />
+                                                        <span>{item.replace(/^[-*]\s+/, '')}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        );
+                                    }
                                     return (
-                                        <h2
-                                            key={index}
-                                            className="text-lg font-bold text-foreground border-b pb-2 pt-2 first:pt-0"
-                                        >
+                                        <p key={index} className="text-sm text-gray-600 leading-[1.8]">
                                             {section.content}
-                                        </h2>
+                                        </p>
                                     );
-                                }
-                                if (section.type === 'subheading') {
-                                    return (
-                                        <h3 key={index} className="text-md font-semibold text-foreground pt-2">
-                                            {section.content}
-                                        </h3>
-                                    );
-                                }
-                                if (section.type === 'list') {
-                                    return (
-                                        <ul key={index} className="space-y-1.5 pl-1">
-                                            {section.content.split('\n').map((item, itemIndex) => (
-                                                <li
-                                                    key={itemIndex}
-                                                    className="flex items-start gap-2 text-sm text-muted-foreground"
-                                                >
-                                                    <span className="text-primary mt-1.5 h-1.5 w-1.5 rounded-full bg-current shrink-0" />
-                                                    <span>{item.replace(/^[-*]\s+/, '')}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    );
-                                }
-                                return (
-                                    <p key={index} className="text-sm text-muted-foreground leading-relaxed">
-                                        {section.content}
-                                    </p>
-                                );
-                            })}
+                                })}
+                            </div>
                         </div>
                     </div>
                 </ScrollArea>
