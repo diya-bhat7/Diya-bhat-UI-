@@ -159,9 +159,33 @@ export default function Candidates() {
     const handleStatusChange = async (candidate: Candidate, newStatus: CandidateStatus) => {
         try {
             await updateStatus.mutateAsync({ id: candidate.id, status: newStatus });
+
+            // Celebrate when candidate is hired!
+            if (newStatus === 'hired') {
+                const { default: confetti } = await import('canvas-confetti');
+                // Left side burst
+                confetti({
+                    particleCount: 60,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0, y: 0.6 },
+                    colors: ['#0d2744', '#2563eb', '#10b981', '#f59e0b', '#8b5cf6'],
+                });
+                // Right side burst
+                confetti({
+                    particleCount: 60,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1, y: 0.6 },
+                    colors: ['#0d2744', '#2563eb', '#10b981', '#f59e0b', '#8b5cf6'],
+                });
+            }
+
             toast({
-                title: 'Status updated',
-                description: `${candidate.name} moved to ${newStatus}.`,
+                title: newStatus === 'hired' ? '🎉 Candidate Hired!' : 'Status updated',
+                description: newStatus === 'hired'
+                    ? `Congratulations! ${candidate.name} has been hired!`
+                    : `${candidate.name} moved to ${newStatus}.`,
             });
         } catch (error: any) {
             toast({

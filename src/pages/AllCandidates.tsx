@@ -300,22 +300,38 @@ export default function AllCandidates() {
                                         )}
                                     </div>
 
-                                    {/* Quick info icons */}
-                                    <div className="flex items-center gap-2 text-gray-400">
+                                    {/* Quick action icons */}
+                                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                         {candidate.phone && (
-                                            <span title={candidate.phone}>
+                                            <a
+                                                href={`tel:${candidate.phone}`}
+                                                title={candidate.phone}
+                                                className="p-1.5 rounded-full hover:bg-muted transition-colors text-gray-400 hover:text-primary"
+                                            >
                                                 <Phone className="h-3.5 w-3.5" />
-                                            </span>
+                                            </a>
                                         )}
                                         {candidate.linkedin_url && (
-                                            <span title="LinkedIn profile">
+                                            <a
+                                                href={candidate.linkedin_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                title="Open LinkedIn profile"
+                                                className="p-1.5 rounded-full hover:bg-[#0A66C2]/10 transition-colors text-gray-400 hover:text-[#0A66C2]"
+                                            >
                                                 <Linkedin className="h-3.5 w-3.5" />
-                                            </span>
+                                            </a>
                                         )}
                                         {candidate.resume_url && (
-                                            <span title="Resume available">
+                                            <a
+                                                href={candidate.resume_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                title="View resume"
+                                                className="p-1.5 rounded-full hover:bg-emerald-500/10 transition-colors text-gray-400 hover:text-emerald-600"
+                                            >
                                                 <FileText className="h-3.5 w-3.5" />
-                                            </span>
+                                            </a>
                                         )}
                                     </div>
                                 </CardContent>

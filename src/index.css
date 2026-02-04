@@ -332,4 +332,100 @@
   .stagger-6 {
     animation-delay: 0.3s;
   }
+
+  /* Celebration bounce animation */
+  @keyframes bounce-celebrate {
+
+    0%,
+    100% {
+      transform: translateY(0) scale(1);
+    }
+
+    25% {
+      transform: translateY(-8px) scale(1.05);
+    }
+
+    50% {
+      transform: translateY(0) scale(1);
+    }
+
+    75% {
+      transform: translateY(-4px) scale(1.02);
+    }
+  }
+
+  .animate-celebrate {
+    animation: bounce-celebrate 0.6s ease-out;
+  }
+
+  /* Ripple effect for buttons */
+  .ripple-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ripple-effect::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+  }
+
+  .ripple-effect:active::after {
+    width: 200px;
+    height: 200px;
+  }
+
+  /* Card hover lift effect */
+  .card-hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card-hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Pulse glow for important elements */
+  @keyframes pulse-glow {
+
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+    }
+
+    50% {
+      box-shadow: 0 0 20px 4px hsl(var(--primary) / 0.2);
+    }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  /* Success shine effect */
+  @keyframes shine {
+    from {
+      background-position: -200% center;
+    }
+
+    to {
+      background-position: 200% center;
+    }
+  }
+
+  .animate-shine {
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%);
+    background-size: 200% 100%;
+    animation: shine 1.5s ease-in-out;
+  }
 }
