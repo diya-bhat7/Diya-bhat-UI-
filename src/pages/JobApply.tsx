@@ -182,7 +182,7 @@ export default function JobApply() {
                 </div>
                 <h1 className="text-3xl font-bold mb-2">Thank You!</h1>
                 <p className="text-slate-600 max-w-md mb-8">
-                    Your application for the **{position.position_name}** role at **{company.company_name}** has been received successfully.
+                    Your application for the <strong>{position.position_name}</strong> role at <strong>{company.company_name}</strong> has been received successfully.
                 </p>
                 <div className="flex gap-4">
                     <Link to={`/careers/${company.id}`}>
