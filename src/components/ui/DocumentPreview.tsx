@@ -138,7 +138,7 @@ export function DocumentPreview({
                 {/* Document Content */}
                 <ScrollArea className="flex-1 max-h-[50vh]">
                     <div className="px-6 py-4">
-                        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg border p-6 space-y-4">
+                        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg border p-6 space-y-4" style={{ fontFamily: 'Archivo, sans-serif' }}>
                             {sections.map((section, index) => {
                                 if (section.type === 'heading') {
                                     return (
@@ -288,7 +288,7 @@ export function DocumentPreviewInline({
                     className="p-4 space-y-3 cursor-pointer"
                     onClick={() => onPreview ? onPreview() : setPreviewOpen(true)}
                 >
-                    <div className="bg-white dark:bg-gray-900/50 rounded-lg border p-4 space-y-3 max-h-48 overflow-hidden relative">
+                    <div className="bg-white dark:bg-gray-900/50 rounded-lg border p-4 space-y-3 max-h-48 overflow-hidden relative" style={{ fontFamily: 'Archivo, sans-serif' }}>
                         {previewSections.map((section, index) => {
                             if (section.type === 'heading') {
                                 return (
