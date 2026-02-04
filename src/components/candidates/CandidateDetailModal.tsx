@@ -24,7 +24,10 @@ import {
     ExternalLink,
     User,
     StickyNote,
+    Volume2,
+    Mic,
 } from 'lucide-react';
+import { VoiceRecorder } from './VoiceRecorder';
 
 interface CandidateDetailModalProps {
     candidate: Candidate | null;
@@ -97,8 +100,8 @@ export function CandidateDetailModal({
                                             <Star
                                                 key={i}
                                                 className={`h-3.5 w-3.5 ${i < candidate.rating!
-                                                        ? 'text-yellow-500 fill-yellow-500'
-                                                        : 'text-yellow-500/30'
+                                                    ? 'text-yellow-500 fill-yellow-500'
+                                                    : 'text-yellow-500/30'
                                                     }`}
                                             />
                                         ))}
@@ -170,6 +173,27 @@ export function CandidateDetailModal({
                             </div>
                         </div>
                     )}
+
+                    {/* Voice Evaluation */}
+                    <div className="space-y-3">
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                            <Volume2 className="h-4 w-4" />
+                            Voice Evaluation
+                        </h3>
+
+                        {candidate.voice_note_url ? (
+                            <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/5 border border-primary/20">
+                                <audio src={candidate.voice_note_url} controls className="h-10 w-full" />
+                            </div>
+                        ) : (
+                            <div className="p-1">
+                                <VoiceRecorder
+                                    candidateId={candidate.id}
+                                    onSave={(url) => onStatusChange(candidate, candidate.status)} // Just trigger refresh via status change or similar
+                                />
+                            </div>
+                        )}
+                    </div>
 
                     {/* Quick Status Change */}
                     <div className="space-y-3">

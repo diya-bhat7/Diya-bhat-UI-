@@ -14,6 +14,7 @@ export interface Candidate {
     status: CandidateStatus;
     notes?: string;
     rating?: number;
+    voice_note_url?: string;
     created_at: string;
     updated_at: string;
 }
@@ -87,6 +88,7 @@ function mapToCandidate(record: any): Candidate {
         status: record.status as CandidateStatus,
         notes: record.notes || undefined,
         rating: record.rating || undefined,
+        voice_note_url: record.voice_note_url || undefined,
         created_at: record.created_at,
         updated_at: record.updated_at,
     };
@@ -136,6 +138,7 @@ export function useCreateCandidate(positionId: string | undefined) {
                     status: newCandidate.status || 'new',
                     notes: newCandidate.notes || null,
                     rating: newCandidate.rating || null,
+                    voice_note_url: newCandidate.voice_note_url || null,
                 })
                 .select()
                 .single();
@@ -171,6 +174,7 @@ export function useUpdateCandidate(positionId: string | undefined) {
                     status: updates.status,
                     notes: updates.notes || null,
                     rating: updates.rating || null,
+                    voice_note_url: updates.voice_note_url || null,
                     updated_at: new Date().toISOString(),
                 })
                 .eq('id', id)
