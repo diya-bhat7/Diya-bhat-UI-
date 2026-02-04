@@ -91,3 +91,32 @@ export function useUpdateCompany() {
         },
     });
 }
+/**
+ * Hook to create company profile
+ */
+export function useCreateCompany() {
+    const queryClient = useQueryClient();
+    const { user, refreshCompany } = useAuth();
+
+    return useMutation({
+        mutationFn: async (newCompany: Omit<Company, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+            if (!user) throw new Error('No user found');
+
+            const { data, error } = await supabase
+                .from('companies')
+                .insert({
+                    ...newCompany,
+                    user_id: user.id,
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data as Company;
+        },
+        onSuccess: async () => {
+            await refreshCompany();
+            queryClient.invalidateQueries({ queryKey: companyKeys.all });
+        },
+    });
+}

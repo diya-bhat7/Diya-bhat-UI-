@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useUpdateCompany } from '@/hooks/useCompany';
+import { useUpdateCompany, useCreateCompany } from '@/hooks/useCompany';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +32,7 @@ export default function Profile() {
 
     // React Query mutation for updating company
     const updateCompany = useUpdateCompany();
+    const createCompany = useCreateCompany();
 
     const [formData, setFormData] = useState({
         companyName: '',
@@ -75,27 +76,37 @@ export default function Profile() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!company) return;
-
         try {
-            await updateCompany.mutateAsync({
-                id: company.id,
-                company_name: formData.companyName,
-                company_website: formData.companyWebsite || null,
-                company_linkedin: formData.companyLinkedin || null,
-                office_locations: formData.officeLocations,
-                contact_title: formData.contactTitle || null,
-                contact_name: formData.contactName,
-            });
+            if (company) {
+                await updateCompany.mutateAsync({
+                    id: company.id,
+                    company_name: formData.companyName,
+                    company_website: formData.companyWebsite || null,
+                    company_linkedin: formData.companyLinkedin || null,
+                    office_locations: formData.officeLocations,
+                    contact_title: formData.contactTitle || null,
+                    contact_name: formData.contactName,
+                });
+            } else {
+                await createCompany.mutateAsync({
+                    company_name: formData.companyName,
+                    company_website: formData.companyWebsite || null,
+                    company_linkedin: formData.companyLinkedin || null,
+                    office_locations: formData.officeLocations,
+                    contact_email: formData.contactEmail,
+                    contact_title: formData.contactTitle || null,
+                    contact_name: formData.contactName,
+                });
+            }
 
             toast({
-                title: 'Profile updated',
-                description: 'Your company profile has been saved successfully.',
+                title: company ? 'Profile updated' : 'Profile created',
+                description: `Your company profile has been ${company ? 'saved' : 'created'} successfully.`,
             });
             setIsEditing(false);
         } catch (error: any) {
             toast({
-                title: 'Update failed',
+                title: company ? 'Update failed' : 'Creation failed',
                 description: error.message,
                 variant: 'destructive',
             });
@@ -467,7 +478,28 @@ export default function Profile() {
                 </div>
 
                 {/* Conditional render based on editing state */}
-                {isEditing ? <ProfileEditMode /> : <ProfileViewMode />}
+                {!company && !isEditing ? (
+                    <Card className="border-primary/20 bg-primary/5">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Building2 className="h-5 w-5 text-primary" />
+                                No Profile Found
+                            </CardTitle>
+                            <CardDescription>
+                                You haven't set up your company profile yet. Please create one to manage your positions and candidates.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardFooter>
+                            <Button onClick={() => setIsEditing(true)} className="btn-primary w-full">
+                                Create Company Profile
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                ) : isEditing ? (
+                    <ProfileEditMode />
+                ) : (
+                    <ProfileViewMode />
+                )}
             </main>
         </div>
     );
