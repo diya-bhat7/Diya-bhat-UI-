@@ -212,7 +212,7 @@ export function DocumentPreview({
     );
 }
 
-// Inline preview component for use in forms
+// Inline preview component for use in forms - Premium Design
 export function DocumentPreviewInline({
     title,
     content,
@@ -227,54 +227,140 @@ export function DocumentPreviewInline({
     className?: string;
 }) {
     const [previewOpen, setPreviewOpen] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     const sections = parseContent(content);
-    const previewLines = sections.slice(0, 3);
+    const previewSections = sections.slice(0, 4);
+
+    const handleCopy = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        await navigator.clipboard.writeText(content);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleDownload = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${title.toLowerCase().replace(/\s+/g, '-')}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <>
             <div
                 className={cn(
-                    "bg-gray-50 dark:bg-gray-900 rounded-lg border p-4 cursor-pointer hover:border-primary/50 transition-colors",
+                    "relative overflow-hidden rounded-xl border bg-gradient-to-br from-primary/5 via-background to-primary/5 transition-all duration-300",
+                    "hover:shadow-lg hover:shadow-primary/10 hover:border-primary/40",
                     className
                 )}
-                onClick={() => onPreview ? onPreview() : setPreviewOpen(true)}
             >
+                {/* Decorative gradient bar */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
+
                 {/* Header */}
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-primary" />
-                        <span className="font-medium text-sm">{title}</span>
+                <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-primary/5 to-transparent">
+                    <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <FileText className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                            <h4 className="font-semibold text-foreground">{title}</h4>
+                            <p className="text-xs text-muted-foreground">{content.split('\n').length} lines</p>
+                        </div>
                     </div>
                     {isGenerated && (
-                        <Badge variant="secondary" className="gap-1 bg-emerald-100 text-emerald-700 border-0 text-xs">
-                            <CheckCircle2 className="h-3 w-3" />
-                            Generated
+                        <Badge variant="secondary" className="gap-1.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            AI Generated
                         </Badge>
                     )}
                 </div>
 
-                {/* Preview Content */}
-                <div className="space-y-2 text-sm text-muted-foreground">
-                    {previewLines.map((section, index) => {
-                        if (section.type === 'heading') {
+                {/* Content Preview */}
+                <div
+                    className="p-4 space-y-3 cursor-pointer"
+                    onClick={() => onPreview ? onPreview() : setPreviewOpen(true)}
+                >
+                    <div className="bg-white dark:bg-gray-900/50 rounded-lg border p-4 space-y-3 max-h-48 overflow-hidden relative">
+                        {previewSections.map((section, index) => {
+                            if (section.type === 'heading') {
+                                return (
+                                    <div key={index} className="font-bold text-foreground text-sm border-l-4 border-primary pl-3 py-1">
+                                        {section.content}
+                                    </div>
+                                );
+                            }
+                            if (section.type === 'subheading') {
+                                return (
+                                    <div key={index} className="font-semibold text-foreground/80 text-sm pl-3">
+                                        {section.content}
+                                    </div>
+                                );
+                            }
+                            if (section.type === 'list') {
+                                return (
+                                    <ul key={index} className="space-y-1 pl-4">
+                                        {section.content.split('\n').slice(0, 3).map((item, itemIndex) => (
+                                            <li key={itemIndex} className="flex items-start gap-2 text-xs text-muted-foreground">
+                                                <span className="text-primary mt-1 h-1.5 w-1.5 rounded-full bg-current shrink-0" />
+                                                <span className="line-clamp-1">{item.replace(/^[-*]\s+/, '')}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                );
+                            }
                             return (
-                                <div key={index} className="font-semibold text-foreground text-xs uppercase tracking-wide">
+                                <p key={index} className="text-xs text-muted-foreground line-clamp-2">
                                     {section.content}
-                                </div>
+                                </p>
                             );
-                        }
-                        return (
-                            <div key={index} className="line-clamp-2 text-xs">
-                                {section.content.substring(0, 100)}...
-                            </div>
-                        );
-                    })}
+                        })}
+
+                        {/* Fade overlay */}
+                        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white dark:from-gray-900/50 to-transparent pointer-events-none" />
+                    </div>
+
+                    {/* Click to expand hint */}
+                    <p className="text-xs text-center text-primary font-medium">
+                        Click to view full document →
+                    </p>
                 </div>
 
-                {/* Click to view hint */}
-                <div className="mt-3 pt-3 border-t text-xs text-primary font-medium">
-                    Click to view full document →
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end gap-2 px-4 py-3 border-t bg-muted/30">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCopy}
+                        className="gap-1.5 text-xs"
+                    >
+                        <Copy className="h-3.5 w-3.5" />
+                        {copied ? 'Copied!' : 'Copy'}
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDownload}
+                        className="gap-1.5 text-xs"
+                    >
+                        <Download className="h-3.5 w-3.5" />
+                        Download
+                    </Button>
+                    <Button
+                        size="sm"
+                        onClick={() => onPreview ? onPreview() : setPreviewOpen(true)}
+                        className="gap-1.5 text-xs"
+                    >
+                        <FileText className="h-3.5 w-3.5" />
+                        View Full
+                    </Button>
                 </div>
             </div>
 
