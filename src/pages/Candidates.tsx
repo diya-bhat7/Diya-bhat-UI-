@@ -19,6 +19,7 @@ import { CandidateCard } from '@/components/candidates/CandidateCard';
 import { CandidateForm } from '@/components/candidates/CandidateForm';
 import { CandidateGrid } from '@/components/candidates/CandidateGrid';
 import { CandidateTable } from '@/components/candidates/CandidateTable';
+import { KanbanBoard } from '@/components/candidates/KanbanBoard';
 import { CandidateDetailModal } from '@/components/candidates/CandidateDetailModal';
 import { CandidateStatus } from '@/components/candidates/CandidateStatusBadge';
 import {
@@ -26,6 +27,7 @@ import {
     Plus,
     LayoutGrid,
     List,
+    Trello,
     Users,
     Briefcase,
 } from 'lucide-react';
@@ -51,7 +53,7 @@ export default function Candidates() {
     const deleteCandidate = useDeleteCandidate(positionId);
     const updateStatus = useUpdateCandidateStatus(positionId);
 
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [viewMode, setViewMode] = useState<'grid' | 'list' | 'kanban'>('kanban');
     const [formOpen, setFormOpen] = useState(false);
     const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
@@ -277,6 +279,13 @@ export default function Candidates() {
                                 >
                                     <List className="h-4 w-4" />
                                 </Button>
+                                <Button
+                                    variant={viewMode === 'kanban' ? 'secondary' : 'ghost'}
+                                    size="sm"
+                                    onClick={() => setViewMode('kanban')}
+                                >
+                                    <Trello className="h-4 w-4" />
+                                </Button>
                             </div>
 
                             <Button onClick={() => setFormOpen(true)}>
@@ -324,13 +333,19 @@ export default function Candidates() {
                         onDelete={promptDeleteCandidate}
                         onStatusChange={handleStatusChange}
                     />
-                ) : (
+                ) : viewMode === 'list' ? (
                     <CandidateTable
                         candidates={candidates}
                         onClick={handleCandidateClick}
                         onEdit={handleEditCandidate}
                         onDelete={promptDeleteCandidate}
                         onStatusChange={handleStatusChange}
+                    />
+                ) : (
+                    <KanbanBoard
+                        candidates={candidates}
+                        onStatusChange={handleStatusChange}
+                        onCandidateClick={handleCandidateClick}
                     />
                 )}
 
