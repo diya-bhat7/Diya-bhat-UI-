@@ -21,6 +21,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Building2, LogOut, User, LayoutDashboard, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { NotificationCenter } from './NotificationCenter';
 
 export const Header = memo(function Header() {
     const { user, company, signOut } = useAuth();
@@ -93,6 +94,7 @@ export const Header = memo(function Header() {
 
                 {/* Right side: Theme toggle + User Menu + Mobile Menu */}
                 <div className="flex items-center gap-2">
+                    <NotificationCenter />
                     <ThemeToggle />
 
                     {/* Desktop User Menu */}

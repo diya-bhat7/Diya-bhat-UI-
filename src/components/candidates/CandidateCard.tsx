@@ -14,6 +14,7 @@ export interface Candidate {
     status: CandidateStatus;
     notes?: string;
     rating?: number;
+    voice_note_url?: string;
     created_at: string;
     updated_at: string;
 }

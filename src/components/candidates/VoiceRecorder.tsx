@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Mic, Square, Trash2, Play, Pause, Save, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useStorage } from '@/hooks/useStorage';
+import { cn } from '@/lib/utils';
 
 interface VoiceRecorderProps {
     candidateId: string;
