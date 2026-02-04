@@ -1,0 +1,474 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { useUpdateCompany } from '@/hooks/useCompany';
+import { Header } from '@/components/layout/Header';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import {
+    Building2, Globe, Linkedin, MapPin, Mail, User, Briefcase,
+    Loader2, ArrowLeft, Save, Pencil, X
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const LOCATIONS = [
+    'Hyderabad',
+    'NCR',
+    'Mumbai',
+    'Chennai',
+    'Pune',
+    'Bangalore',
+    'Other Cities',
+];
+
+export default function Profile() {
+    const navigate = useNavigate();
+    const { user, company, loading: authLoading } = useAuth();
+    const { toast } = useToast();
+    const [isEditing, setIsEditing] = useState(false);
+
+    // React Query mutation for updating company
+    const updateCompany = useUpdateCompany();
+
+    const [formData, setFormData] = useState({
+        companyName: '',
+        companyWebsite: '',
+        companyLinkedin: '',
+        officeLocations: [] as string[],
+        contactEmail: '',
+        contactTitle: '',
+        contactName: '',
+    });
+
+    // Redirect to login if not authenticated
+    if (!authLoading && !user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    // Populate form when company data is available
+    useEffect(() => {
+        if (company) {
+            setFormData({
+                companyName: company.company_name || '',
+                companyWebsite: company.company_website || '',
+                companyLinkedin: company.company_linkedin || '',
+                officeLocations: company.office_locations || [],
+                contactEmail: company.contact_email || '',
+                contactTitle: company.contact_title || '',
+                contactName: company.contact_name || '',
+            });
+        }
+    }, [company]);
+
+    const handleLocationToggle = (location: string) => {
+        setFormData(prev => ({
+            ...prev,
+            officeLocations: prev.officeLocations.includes(location)
+                ? prev.officeLocations.filter(l => l !== location)
+                : [...prev.officeLocations, location],
+        }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!company) return;
+
+        try {
+            await updateCompany.mutateAsync({
+                id: company.id,
+                company_name: formData.companyName,
+                company_website: formData.companyWebsite || null,
+                company_linkedin: formData.companyLinkedin || null,
+                office_locations: formData.officeLocations,
+                contact_title: formData.contactTitle || null,
+                contact_name: formData.contactName,
+            });
+
+            toast({
+                title: 'Profile updated',
+                description: 'Your company profile has been saved successfully.',
+            });
+            setIsEditing(false);
+        } catch (error: any) {
+            toast({
+                title: 'Update failed',
+                description: error.message,
+                variant: 'destructive',
+            });
+        }
+    };
+
+    const handleCancelEdit = () => {
+        // Reset form data to original company data
+        if (company) {
+            setFormData({
+                companyName: company.company_name || '',
+                companyWebsite: company.company_website || '',
+                companyLinkedin: company.company_linkedin || '',
+                officeLocations: company.office_locations || [],
+                contactEmail: company.contact_email || '',
+                contactTitle: company.contact_title || '',
+                contactName: company.contact_name || '',
+            });
+        }
+        setIsEditing(false);
+    };
+
+    if (authLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    // Read-only view component
+    const ProfileViewMode = () => (
+        <Card className="border-border/50">
+            <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                    <CardTitle>Company Information</CardTitle>
+                    <CardDescription>
+                        Your company details visible to our team
+                    </CardDescription>
+                </div>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditing(true)}
+                    className="gap-2"
+                >
+                    <Pencil className="h-4 w-4" />
+                    Edit Profile
+                </Button>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+                {/* Company Information Section */}
+                <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <p className="text-sm text-muted-foreground flex items-center gap-2">
+                                <Building2 className="h-4 w-4" />
+                                Company Name
+                            </p>
+                            <p className="font-medium">{formData.companyName || '—'}</p>
+                        </div>
+
+                        <div className="space-y-1">
+                            <p className="text-sm text-muted-foreground flex items-center gap-2">
+                                <Globe className="h-4 w-4" />
+                                Company Website
+                            </p>
+                            <p className="font-medium">
+                                {formData.companyWebsite ? (
+                                    <a
+                                        href={formData.companyWebsite}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-primary hover:underline"
+                                    >
+                                        {formData.companyWebsite}
+                                    </a>
+                                ) : '—'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground flex items-center gap-2">
+                            <Linkedin className="h-4 w-4" />
+                            Company LinkedIn
+                        </p>
+                        <p className="font-medium">
+                            {formData.companyLinkedin ? (
+                                <a
+                                    href={formData.companyLinkedin}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline"
+                                >
+                                    {formData.companyLinkedin}
+                                </a>
+                            ) : '—'}
+                        </p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            Office Locations
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                            {formData.officeLocations.length > 0 ? (
+                                formData.officeLocations.map(location => (
+                                    <span
+                                        key={location}
+                                        className="px-3 py-1 rounded-full text-sm bg-primary/10 text-primary"
+                                    >
+                                        {location}
+                                    </span>
+                                ))
+                            ) : (
+                                <span className="text-muted-foreground">No locations specified</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Contact Information Section */}
+                <div className="space-y-4 pt-4 border-t">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                        Contact Information
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <p className="text-sm text-muted-foreground flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                Your Name
+                            </p>
+                            <p className="font-medium">{formData.contactName || '—'}</p>
+                        </div>
+
+                        <div className="space-y-1">
+                            <p className="text-sm text-muted-foreground flex items-center gap-2">
+                                <Briefcase className="h-4 w-4" />
+                                Your Title
+                            </p>
+                            <p className="font-medium">{formData.contactTitle || '—'}</p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground flex items-center gap-2">
+                            <Mail className="h-4 w-4" />
+                            Email Address
+                        </p>
+                        <p className="font-medium">{formData.contactEmail || '—'}</p>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+
+    // Edit mode component (existing form)
+    const ProfileEditMode = () => (
+        <Card className="border-border/50">
+            <form onSubmit={handleSubmit}>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Edit Company Information</CardTitle>
+                        <CardDescription>
+                            Update your company details visible to our team
+                        </CardDescription>
+                    </div>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCancelEdit}
+                        className="gap-2"
+                    >
+                        <X className="h-4 w-4" />
+                        Cancel
+                    </Button>
+                </CardHeader>
+
+                <CardContent className="space-y-6">
+                    {/* Company Information Section */}
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="companyName" className="flex items-center gap-2">
+                                    <Building2 className="h-4 w-4" />
+                                    Company Name *
+                                </Label>
+                                <Input
+                                    id="companyName"
+                                    placeholder="Acme Corporation"
+                                    value={formData.companyName}
+                                    onChange={e => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
+                                    required
+                                    className="bg-background"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="companyWebsite" className="flex items-center gap-2">
+                                    <Globe className="h-4 w-4" />
+                                    Company Website
+                                </Label>
+                                <Input
+                                    id="companyWebsite"
+                                    type="url"
+                                    placeholder="https://example.com"
+                                    value={formData.companyWebsite}
+                                    onChange={e => setFormData(prev => ({ ...prev, companyWebsite: e.target.value }))}
+                                    className="bg-background"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="companyLinkedin" className="flex items-center gap-2">
+                                <Linkedin className="h-4 w-4" />
+                                Company LinkedIn
+                            </Label>
+                            <Input
+                                id="companyLinkedin"
+                                type="url"
+                                placeholder="https://linkedin.com/company/..."
+                                value={formData.companyLinkedin}
+                                onChange={e => setFormData(prev => ({ ...prev, companyLinkedin: e.target.value }))}
+                                className="bg-background"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4" />
+                                Office Locations
+                            </Label>
+                            <div className="flex flex-wrap gap-2">
+                                {LOCATIONS.map(location => (
+                                    <button
+                                        key={location}
+                                        type="button"
+                                        onClick={() => handleLocationToggle(location)}
+                                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${formData.officeLocations.includes(location)
+                                            ? 'bg-primary text-primary-foreground shadow-md'
+                                            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                                            }`}
+                                    >
+                                        {location}
+                                        {formData.officeLocations.includes(location) && (
+                                            <span className="ml-1">×</span>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Contact Information Section */}
+                    <div className="space-y-4 pt-4 border-t">
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                            Contact Information
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="contactName" className="flex items-center gap-2">
+                                    <User className="h-4 w-4" />
+                                    Your Name *
+                                </Label>
+                                <Input
+                                    id="contactName"
+                                    placeholder="John Doe"
+                                    value={formData.contactName}
+                                    onChange={e => setFormData(prev => ({ ...prev, contactName: e.target.value }))}
+                                    required
+                                    className="bg-background"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="contactTitle" className="flex items-center gap-2">
+                                    <Briefcase className="h-4 w-4" />
+                                    Your Title
+                                </Label>
+                                <Input
+                                    id="contactTitle"
+                                    placeholder="Head of Talent Acquisition"
+                                    value={formData.contactTitle}
+                                    onChange={e => setFormData(prev => ({ ...prev, contactTitle: e.target.value }))}
+                                    className="bg-background"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="contactEmail" className="flex items-center gap-2">
+                                <Mail className="h-4 w-4" />
+                                Email Address
+                            </Label>
+                            <Input
+                                id="contactEmail"
+                                type="email"
+                                value={formData.contactEmail}
+                                disabled
+                                className="bg-muted"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Email cannot be changed. Contact support if you need to update it.
+                            </p>
+                        </div>
+                    </div>
+                </CardContent>
+
+                <CardFooter className="flex justify-end gap-3">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleCancelEdit}
+                        disabled={updateCompany.isPending}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        type="submit"
+                        className="btn-primary"
+                        disabled={updateCompany.isPending}
+                    >
+                        {updateCompany.isPending ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            <>
+                                <Save className="mr-2 h-4 w-4" />
+                                Save Changes
+                            </>
+                        )}
+                    </Button>
+                </CardFooter>
+            </form>
+        </Card>
+    );
+
+    return (
+        <div className="min-h-screen bg-background">
+            <Header />
+
+            <main className="container mx-auto px-4 py-8 max-w-2xl pb-20 md:pb-8">
+                {/* Back Link */}
+                <Link
+                    to="/dashboard"
+                    className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back to Dashboard
+                </Link>
+
+                {/* Page Header */}
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-foreground">
+                        Company Profile
+                    </h1>
+                    <p className="text-muted-foreground mt-1">
+                        {isEditing ? 'Edit your company information' : 'View your company information and contact details'}
+                    </p>
+                </div>
+
+                {/* Conditional render based on editing state */}
+                {isEditing ? <ProfileEditMode /> : <ProfileViewMode />}
+            </main>
+        </div>
+    );
+}
