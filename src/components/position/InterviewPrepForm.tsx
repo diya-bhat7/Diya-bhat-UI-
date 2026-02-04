@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles, Loader2, FileText, CheckCircle2, PartyPopper } from 'lucide-react';
 import { DocumentPreviewInline } from '@/components/ui/DocumentPreview';
+import { generateCustomizedInterviewPrep } from '@/lib/document-templates';
 
 export interface InterviewPrepData {
     generatedJd: string;
@@ -16,6 +17,7 @@ interface InterviewPrepFormProps {
     onFinish: () => void;
     onBack: () => void;
     loading?: boolean;
+    category?: string; // Position category for role-based templates
 }
 
 export function InterviewPrepForm({
@@ -24,81 +26,20 @@ export function InterviewPrepForm({
     onFinish,
     onBack,
     loading = false,
+    category,
 }: InterviewPrepFormProps) {
     const [generating, setGenerating] = useState(false);
 
     const handleGenerateInterviewPrep = async () => {
         setGenerating(true);
 
-        // Simulate AI generation - in production, this would call an actual API
-        await new Promise((resolve) => setTimeout(resolve, 2500));
+        // Simulate AI processing delay
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        const mockInterviewPrep = `# Interview Preparation Document
+        // Generate role-based interview prep using templates
+        const customizedPrep = generateCustomizedInterviewPrep(category || 'General');
 
-## Interview Structure
-
-### Round 1: Technical Screening (45 minutes)
-- Technical fundamentals assessment
-- Problem-solving exercise
-- Basic coding challenge
-
-### Round 2: Technical Deep Dive (60 minutes)
-- System design discussion
-- Architecture review
-- Code review exercise
-
-### Round 3: Cultural Fit (45 minutes)
-- Behavioral questions
-- Team dynamics assessment
-- Career goals discussion
-
----
-
-## Suggested Interview Questions
-
-### Technical Questions
-1. Describe a complex technical problem you solved recently.
-2. How do you approach debugging production issues?
-3. Explain your experience with [relevant technologies].
-4. Walk us through your approach to system design.
-
-### Behavioral Questions
-1. Tell me about a time you had to meet a tight deadline.
-2. How do you handle disagreements with team members?
-3. Describe a situation where you had to learn a new technology quickly.
-4. How do you prioritize tasks when everything seems urgent?
-
-### Problem-Solving Scenarios
-1. Given a performance bottleneck, how would you approach diagnosing it?
-2. How would you design a system that handles [specific requirement]?
-
----
-
-## Evaluation Criteria
-
-| Criterion | Weight | Description |
-|-----------|--------|-------------|
-| Technical Skills | 35% | Depth of technical knowledge and coding ability |
-| Problem Solving | 25% | Approach to complex problems and debugging |
-| Communication | 20% | Clarity in explaining technical concepts |
-| Cultural Fit | 20% | Alignment with team values and work style |
-
----
-
-## Red Flags to Watch For
-- Unable to explain past work clearly
-- Dismissive of feedback or alternative approaches
-- Lack of curiosity about the role or company
-- Inconsistencies in resume claims
-
-## Green Flags
-- Asks thoughtful questions about the team and role
-- Shows enthusiasm for learning
-- Takes ownership of past mistakes
-- Provides specific examples with measurable outcomes
-`;
-
-        onChange({ ...data, interviewPrepDoc: mockInterviewPrep });
+        onChange({ ...data, interviewPrepDoc: customizedPrep });
         setGenerating(false);
     };
 

@@ -7,6 +7,7 @@ import { FileUpload } from '@/components/ui/MultiSelect';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { DocumentPreviewInline } from '@/components/ui/DocumentPreview';
+import { generateCustomizedJD } from '@/lib/document-templates';
 
 export interface RequirementsData {
     clientJdFile: File | null;
@@ -22,6 +23,7 @@ interface RequirementsFormProps {
     onBack: () => void;
     onCancel: () => void;
     loading?: boolean;
+    category?: string; // Position category for role-based templates
 }
 
 export function RequirementsForm({
@@ -31,6 +33,7 @@ export function RequirementsForm({
     onBack,
     onCancel,
     loading = false,
+    category,
 }: RequirementsFormProps) {
     const [generating, setGenerating] = useState(false);
 
@@ -44,37 +47,17 @@ export function RequirementsForm({
     const handleGenerateJD = async () => {
         setGenerating(true);
 
-        // Simulate AI generation - in production, this would call an actual API
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        // Simulate AI processing delay
+        await new Promise((resolve) => setTimeout(resolve, 1500));
 
-        const mockJD = `## Position Overview
+        // Generate role-based JD using templates
+        const customizedJD = generateCustomizedJD(
+            category || 'General',
+            data.keyRequirements,
+            data.clientJdText
+        );
 
-This role is an excellent opportunity for a skilled professional to join our team. We are looking for someone with strong technical abilities and excellent communication skills.
-
-## Key Responsibilities
-
-- Lead and participate in the design, development, and deployment of scalable solutions
-- Collaborate with cross-functional teams to define and implement innovative solutions
-- Mentor junior team members and contribute to team growth
-- Participate in code reviews and ensure code quality standards are met
-- Stay current with industry trends and emerging technologies
-
-## Required Qualifications
-
-${data.keyRequirements || '- Relevant experience in the field\n- Strong problem-solving skills\n- Excellent communication abilities'}
-
-## What We Offer
-
-- Competitive compensation package
-- Flexible work arrangements
-- Professional development opportunities
-- Collaborative and inclusive work environment
-- Health and wellness benefits
-
-${data.clientJdText ? '\n## Additional Notes\n' + data.clientJdText.slice(0, 200) + '...' : ''}
-`;
-
-        handleChange('generatedJd', mockJD);
+        handleChange('generatedJd', customizedJD);
         setGenerating(false);
     };
 
