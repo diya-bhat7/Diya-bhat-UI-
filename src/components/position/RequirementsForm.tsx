@@ -3,11 +3,14 @@ import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { FileUpload } from '@/components/ui/MultiSelect';
 import { Card, CardContent } from '@/components/ui/card';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, Bot, Cpu } from 'lucide-react';
 import { DocumentPreviewInline } from '@/components/ui/DocumentPreview';
 import { generateCustomizedJD } from '@/lib/document-templates';
+import { smartGenerateJD, isAIAvailable } from '@/lib/ai-service';
+import { cn } from '@/lib/utils';
 
 export interface RequirementsData {
     clientJdFile: File | null;
@@ -24,6 +27,7 @@ interface RequirementsFormProps {
     onCancel: () => void;
     loading?: boolean;
     category?: string; // Position category for role-based templates
+    positionName?: string;
 }
 
 export function RequirementsForm({
@@ -34,8 +38,10 @@ export function RequirementsForm({
     onCancel,
     loading = false,
     category,
+    positionName,
 }: RequirementsFormProps) {
     const [generating, setGenerating] = useState(false);
+    const [usedAI, setUsedAI] = useState(false);
 
     const handleChange = <K extends keyof RequirementsData>(
         key: K,
@@ -47,25 +53,72 @@ export function RequirementsForm({
     const handleGenerateJD = async () => {
         setGenerating(true);
 
-        // Simulate AI processing delay
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        try {
+            // Use smart generation - AI first, then templates
+            const result = await smartGenerateJD(
+                {
+                    positionName: positionName || 'Position',
+                    category: category || 'General',
+                    companyName: 'Our Company',
+                },
+                () => generateCustomizedJD(
+                    category || 'General',
+                    data.keyRequirements,
+                    data.clientJdText
+                )
+            );
 
-        // Generate role-based JD using templates
-        const customizedJD = generateCustomizedJD(
-            category || 'General',
-            data.keyRequirements,
-            data.clientJdText
-        );
+            setUsedAI(result.usedAI);
+            handleChange('generatedJd', result.content);
+        } catch (err) {
+            // If AI fails, fall back to templates
+            const fallback = generateCustomizedJD(
+                category || 'General',
+                data.keyRequirements,
+                data.clientJdText
+            );
+            handleChange('generatedJd', fallback);
+            setUsedAI(false);
+        }
 
-        handleChange('generatedJd', customizedJD);
         setGenerating(false);
     };
 
     const hasContent = data.clientJdText.trim() !== '' || data.keyRequirements.trim() !== '';
     const canSubmit = data.generatedJd.trim() !== '';
+    const aiAvailable = isAIAvailable();
 
     return (
         <div className="space-y-6">
+            {/* AI Status Banner */}
+            <div className={cn(
+                "flex items-center justify-between p-3 rounded-lg border",
+                aiAvailable
+                    ? "bg-emerald-500/10 border-emerald-500/30"
+                    : "bg-amber-500/10 border-amber-500/30"
+            )}>
+                <div className="flex items-center gap-2">
+                    {aiAvailable ? (
+                        <>
+                            <Bot className="h-4 w-4 text-emerald-600" />
+                            <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                                Gemini AI Connected
+                            </span>
+                        </>
+                    ) : (
+                        <>
+                            <Cpu className="h-4 w-4 text-amber-600" />
+                            <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                                Using Smart Templates
+                            </span>
+                        </>
+                    )}
+                </div>
+                <Badge variant="secondary" className="text-xs">
+                    {aiAvailable ? 'AI-Powered' : 'Template-Based'}
+                </Badge>
+            </div>
+
             {/* Upload JD Document */}
             <div className="space-y-2">
                 <Label>Upload JD Document (Optional)</Label>
@@ -110,12 +163,12 @@ export function RequirementsForm({
                     {generating ? (
                         <>
                             <Loader2 className="h-5 w-5 animate-spin" />
-                            Generating JD...
+                            {aiAvailable ? 'AI Generating JD...' : 'Generating JD...'}
                         </>
                     ) : (
                         <>
                             <Sparkles className="h-5 w-5" />
-                            Generate JD
+                            Generate JD {aiAvailable && '(AI)'}
                         </>
                     )}
                 </Button>
@@ -123,11 +176,21 @@ export function RequirementsForm({
 
             {/* Generated JD Display */}
             {data.generatedJd && (
-                <DocumentPreviewInline
-                    title="Job Description"
-                    content={data.generatedJd}
-                    isGenerated={true}
-                />
+                <div className="relative">
+                    {usedAI && (
+                        <Badge
+                            className="absolute -top-2 right-4 z-10 bg-gradient-to-r from-violet-500 to-purple-500 text-white"
+                        >
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            AI Generated
+                        </Badge>
+                    )}
+                    <DocumentPreviewInline
+                        title="Job Description"
+                        content={data.generatedJd}
+                        isGenerated={true}
+                    />
+                </div>
             )}
 
             {/* Action Buttons */}
