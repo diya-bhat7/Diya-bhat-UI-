@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUpdateCompany, useCreateCompany } from '@/hooks/useCompany';
@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import {
     Building2, Globe, Linkedin, MapPin, Mail, User, Briefcase,
-    Loader2, ArrowLeft, Save, Pencil, X
+    Loader2, ArrowLeft, Save, Pencil, X, ImagePlus, Trash2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -44,6 +45,13 @@ export default function Profile() {
         contactName: '',
     });
 
+    // Logo upload state
+    const logoInputRef = useRef<HTMLInputElement>(null);
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [uploadingLogo, setUploadingLogo] = useState(false);
+    const [currentLogoUrl, setCurrentLogoUrl] = useState<string | null>(null);
+
     // Redirect to login if not authenticated
     if (!authLoading && !user) {
         return <Navigate to="/login" replace />;
@@ -61,8 +69,81 @@ export default function Profile() {
                 contactTitle: company.contact_title || '',
                 contactName: company.contact_name || '',
             });
+            // Set current logo URL
+            setCurrentLogoUrl(company.company_logo || null);
         }
     }, [company]);
+
+    // Logo file selection handler
+    const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            toast({
+                title: 'Invalid file type',
+                description: 'Please upload a PNG, JPG, SVG, or WebP image.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        // Validate file size (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            toast({
+                title: 'File too large',
+                description: 'Please upload an image smaller than 2MB.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        setLogoFile(file);
+        setLogoPreview(URL.createObjectURL(file));
+    };
+
+    // Remove selected logo
+    const handleRemoveLogo = () => {
+        setLogoFile(null);
+        setLogoPreview(null);
+        if (logoInputRef.current) {
+            logoInputRef.current.value = '';
+        }
+    };
+
+    // Upload logo to Supabase storage
+    const uploadLogo = async (): Promise<string | null> => {
+        if (!logoFile || !user) return null;
+
+        setUploadingLogo(true);
+        try {
+            const fileExt = logoFile.name.split('.').pop();
+            const fileName = `${user.id}/logo-${Date.now()}.${fileExt}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('company-assets')
+                .upload(fileName, logoFile, { upsert: true });
+
+            if (uploadError) throw uploadError;
+
+            const { data } = supabase.storage
+                .from('company-assets')
+                .getPublicUrl(fileName);
+
+            return data.publicUrl;
+        } catch (error: any) {
+            toast({
+                title: 'Logo upload failed',
+                description: error.message,
+                variant: 'destructive',
+            });
+            return null;
+        } finally {
+            setUploadingLogo(false);
+        }
+    };
 
     const handleLocationToggle = (location: string) => {
         setFormData(prev => ({

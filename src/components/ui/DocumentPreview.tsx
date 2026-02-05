@@ -116,7 +116,7 @@ export function DocumentPreview({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[85vh] p-0 gap-0">
+            <DialogContent className="max-w-2xl max-h-[85vh] p-0 gap-0 flex flex-col">
                 {/* Header */}
                 <DialogHeader className="px-6 py-4 border-b">
                     <div className="flex items-center justify-between">
