@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { StraatixLogo } from '@/components/ui/StraatixLogo';
+import { AuthLogo } from '@/components/ui/AuthLogo';
 import { PasswordStrengthIndicator, PasswordMatchIndicator } from '@/components/ui/PasswordStrength';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -183,8 +183,8 @@ export default function Register() {
             <div className="w-full max-w-2xl relative z-10">
                 {/* Header */}
                 <div className="text-center mb-8 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-                    <div className="flex justify-center mb-4">
-                        <StraatixLogo size="lg" />
+                    <div className="flex justify-center mb-6">
+                        <AuthLogo size="lg" />
                     </div>
                     <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">
                         <span className="text-gradient">Create Your Account</span>

@@ -74,6 +74,7 @@ export type Database = {
           company_name: string
           company_website: string | null
           company_linkedin: string | null
+          company_logo: string | null
           office_locations: string[] | null
           contact_email: string
           contact_title: string | null
@@ -87,6 +88,7 @@ export type Database = {
           company_name: string
           company_website?: string | null
           company_linkedin?: string | null
+          company_logo?: string | null
           office_locations?: string[] | null
           contact_email: string
           contact_title?: string | null
@@ -100,6 +102,7 @@ export type Database = {
           company_name?: string
           company_website?: string | null
           company_linkedin?: string | null
+          company_logo?: string | null
           office_locations?: string[] | null
           contact_email?: string
           contact_title?: string | null
