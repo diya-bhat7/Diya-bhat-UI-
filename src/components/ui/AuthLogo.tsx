@@ -1,29 +1,29 @@
 /**
  * AuthLogo - Straatix Partners logo for authentication pages
- * Exact match to brand identity: S/P monogram with diagonal slash
+ * Exact match to brand identity: S/P monogram, sharp corners
  */
 export function AuthLogo({ size = 'lg' }: { size?: 'sm' | 'md' | 'lg' }) {
     const sizeConfig = {
         sm: {
+            container: 'py-3 px-5',
+            monogramSize: 'text-2xl',
+            textSize: 'text-[10px]',
+            dividerH: 'h-8',
+            gap: 'gap-3'
+        },
+        md: {
             container: 'py-4 px-6',
             monogramSize: 'text-3xl',
-            textSize: 'text-[11px]',
+            textSize: 'text-xs',
             dividerH: 'h-10',
             gap: 'gap-4'
         },
-        md: {
+        lg: {
             container: 'py-5 px-8',
             monogramSize: 'text-4xl',
-            textSize: 'text-xs',
+            textSize: 'text-sm',
             dividerH: 'h-12',
             gap: 'gap-5'
-        },
-        lg: {
-            container: 'py-6 px-10',
-            monogramSize: 'text-5xl',
-            textSize: 'text-sm',
-            dividerH: 'h-14',
-            gap: 'gap-6'
         },
     };
 
@@ -31,13 +31,13 @@ export function AuthLogo({ size = 'lg' }: { size?: 'sm' | 'md' | 'lg' }) {
 
     return (
         <div
-            className={`${config.container} rounded-lg inline-flex items-center ${config.gap}`}
+            className={`${config.container} inline-flex items-center ${config.gap}`}
             style={{
-                backgroundColor: '#0f172a'
+                backgroundColor: '#1e3a5f'  /* Softer navy blue */
             }}
         >
-            {/* S/P Monogram - Crossed/Overlapping Style */}
-            <div className="relative flex items-center justify-center">
+            {/* S/P Monogram */}
+            <div className="flex items-center justify-center">
                 <span
                     className={`${config.monogramSize} text-white leading-none`}
                     style={{
@@ -49,10 +49,11 @@ export function AuthLogo({ size = 'lg' }: { size?: 'sm' | 'md' | 'lg' }) {
                     S
                 </span>
                 <span
-                    className={`${config.monogramSize} text-white/70 leading-none -mx-1`}
+                    className={`${config.monogramSize} text-white/60 leading-none`}
                     style={{
                         fontFamily: 'Georgia, "Times New Roman", serif',
-                        fontWeight: 300
+                        fontWeight: 300,
+                        margin: '0 -2px'
                     }}
                 >
                     /
@@ -75,13 +76,13 @@ export function AuthLogo({ size = 'lg' }: { size?: 'sm' | 'md' | 'lg' }) {
             {/* Brand Text */}
             <div className="flex flex-col justify-center">
                 <span
-                    className={`${config.textSize} text-white font-normal tracking-[0.3em] leading-relaxed`}
+                    className={`${config.textSize} text-white font-light tracking-[0.25em] leading-relaxed`}
                     style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
                 >
                     STRAATIX
                 </span>
                 <span
-                    className={`${config.textSize} text-white font-normal tracking-[0.3em] leading-relaxed`}
+                    className={`${config.textSize} text-white font-light tracking-[0.25em] leading-relaxed`}
                     style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
                 >
                     PARTNERS
