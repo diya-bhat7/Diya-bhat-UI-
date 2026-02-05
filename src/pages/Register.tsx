@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { StraatixLogo } from '@/components/ui/StraatixLogo';
+import { PasswordStrengthIndicator, PasswordMatchIndicator } from '@/components/ui/PasswordStrength';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Building2, Globe, Linkedin, MapPin, Mail, User, Briefcase, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Eye, EyeOff, Building2, Globe, Linkedin, MapPin, Mail, User, Briefcase, Loader2, Upload, ImageIcon, X } from 'lucide-react';
 
 const LOCATIONS = [
     'Hyderabad',
@@ -23,9 +25,12 @@ export default function Register() {
     const navigate = useNavigate();
     const { signUp } = useAuth();
     const { toast } = useToast();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         companyName: '',
         companyWebsite: '',
@@ -45,6 +50,67 @@ export default function Register() {
                 ? prev.officeLocations.filter(l => l !== location)
                 : [...prev.officeLocations, location],
         }));
+    };
+
+    const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                toast({
+                    title: 'Invalid file type',
+                    description: 'Please upload an image file.',
+                    variant: 'destructive',
+                });
+                return;
+            }
+            // Validate file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                toast({
+                    title: 'File too large',
+                    description: 'Logo must be under 2MB.',
+                    variant: 'destructive',
+                });
+                return;
+            }
+            setLogoFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setLogoPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveLogo = () => {
+        setLogoFile(null);
+        setLogoPreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const uploadLogo = async (): Promise<string | null> => {
+        if (!logoFile) return null;
+
+        const fileExt = logoFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `logos/${fileName}`;
+
+        const { error } = await supabase.storage
+            .from('company-assets')
+            .upload(filePath, logoFile);
+
+        if (error) {
+            console.error('Logo upload error:', error);
+            return null;
+        }
+
+        const { data: urlData } = supabase.storage
+            .from('company-assets')
+            .getPublicUrl(filePath);
+
+        return urlData.publicUrl;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -70,10 +136,17 @@ export default function Register() {
 
         setLoading(true);
 
+        // Upload logo if provided
+        let logoUrl: string | null = null;
+        if (logoFile) {
+            logoUrl = await uploadLogo();
+        }
+
         const { error } = await signUp(formData.contactEmail, formData.password, {
             company_name: formData.companyName,
             company_website: formData.companyWebsite || null,
             company_linkedin: formData.companyLinkedin || null,
+            company_logo: logoUrl,
             office_locations: formData.officeLocations,
             contact_email: formData.contactEmail,
             contact_title: formData.contactTitle || null,
@@ -135,6 +208,58 @@ export default function Register() {
                                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                                     Company Information
                                 </h3>
+
+                                {/* Company Logo Upload */}
+                                <div className="space-y-2">
+                                    <Label className="flex items-center gap-2">
+                                        <ImageIcon className="h-4 w-4" />
+                                        Company Logo
+                                    </Label>
+                                    <div className="flex items-center gap-4">
+                                        {logoPreview ? (
+                                            <div className="relative group">
+                                                <div className="h-20 w-20 rounded-xl border-2 border-primary/30 bg-white overflow-hidden shadow-sm">
+                                                    <img
+                                                        src={logoPreview}
+                                                        alt="Company logo preview"
+                                                        className="h-full w-full object-contain p-1"
+                                                    />
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleRemoveLogo}
+                                                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                                                >
+                                                    <X className="h-3.5 w-3.5" />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="h-20 w-20 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 bg-muted/50 flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer"
+                                            >
+                                                <Upload className="h-5 w-5 text-muted-foreground" />
+                                                <span className="text-[10px] text-muted-foreground">Upload</span>
+                                            </button>
+                                        )}
+                                        <div className="flex-1">
+                                            <p className="text-sm text-muted-foreground">
+                                                Upload your company logo. It will appear in the dashboard header.
+                                            </p>
+                                            <p className="text-xs text-muted-foreground/70 mt-1">
+                                                PNG, JPG, or SVG (max 2MB)
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleLogoSelect}
+                                        className="hidden"
+                                    />
+                                </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
@@ -291,6 +416,7 @@ export default function Register() {
                                                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                             </button>
                                         </div>
+                                        <PasswordStrengthIndicator password={formData.password} />
                                     </div>
 
                                     <div className="space-y-2">
@@ -304,6 +430,10 @@ export default function Register() {
                                             required
                                             minLength={6}
                                             className="input-elegant"
+                                        />
+                                        <PasswordMatchIndicator
+                                            password={formData.password}
+                                            confirmPassword={formData.confirmPassword}
                                         />
                                     </div>
                                 </div>

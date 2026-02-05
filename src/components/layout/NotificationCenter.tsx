@@ -3,20 +3,19 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuHeader,
     DropdownMenuTrigger,
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useNotifications, Notification } from '@/hooks/useNotifications';
+import { useNotifications, type AppNotification } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 export function NotificationCenter() {
     const { notifications, unreadCount, markAsRead, clearAll } = useNotifications();
 
-    const getIcon = (type: Notification['type']) => {
+    const getIcon = (type: AppNotification['type']) => {
         switch (type) {
             case 'success': return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
             case 'warning': return <AlertTriangle className="h-4 w-4 text-amber-500" />;

@@ -18,8 +18,8 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Building2, LogOut, User, LayoutDashboard, Menu, X } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Building2, LogOut, User, LayoutDashboard, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NotificationCenter } from './NotificationCenter';
 
@@ -53,6 +53,13 @@ export const Header = memo(function Header() {
             .toUpperCase()
             .slice(0, 2);
     }, [company?.contact_name]);
+
+    // Get company logo URL - check for company_logo field
+    const companyLogoUrl = useMemo(() => {
+        // Type assertion since we're adding a new field
+        const logo = (company as any)?.company_logo;
+        return logo || null;
+    }, [company]);
 
     const navLinks = [
         { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -109,6 +116,13 @@ export const Header = memo(function Header() {
                                         </span>
                                     </div>
                                     <Avatar className="h-8 w-8 ring-2 ring-primary/10">
+                                        {companyLogoUrl ? (
+                                            <AvatarImage
+                                                src={companyLogoUrl}
+                                                alt={`${company.company_name} logo`}
+                                                className="object-contain p-0.5"
+                                            />
+                                        ) : null}
                                         <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
                                             {initials}
                                         </AvatarFallback>
@@ -118,6 +132,13 @@ export const Header = memo(function Header() {
                             <DropdownMenuContent align="end" className="w-56">
                                 <div className="flex items-center gap-3 p-3">
                                     <Avatar className="h-10 w-10">
+                                        {companyLogoUrl ? (
+                                            <AvatarImage
+                                                src={companyLogoUrl}
+                                                alt={`${company.company_name} logo`}
+                                                className="object-contain p-0.5"
+                                            />
+                                        ) : null}
                                         <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                                             {initials}
                                         </AvatarFallback>
@@ -154,6 +175,13 @@ export const Header = memo(function Header() {
                                 <SheetHeader className="pb-6">
                                     <SheetTitle className="flex items-center gap-3">
                                         <Avatar className="h-10 w-10">
+                                            {companyLogoUrl ? (
+                                                <AvatarImage
+                                                    src={companyLogoUrl}
+                                                    alt={`${company.company_name} logo`}
+                                                    className="object-contain p-0.5"
+                                                />
+                                            ) : null}
                                             <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                                                 {initials}
                                             </AvatarFallback>
