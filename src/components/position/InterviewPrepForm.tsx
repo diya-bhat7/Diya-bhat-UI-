@@ -2,9 +2,12 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Sparkles, Loader2, FileText, CheckCircle2, PartyPopper } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Sparkles, Loader2, FileText, CheckCircle2, PartyPopper, Bot, Cpu } from 'lucide-react';
 import { DocumentPreviewInline } from '@/components/ui/DocumentPreview';
 import { generateCustomizedInterviewPrep } from '@/lib/document-templates';
+import { smartGenerateInterviewPrep, isAIAvailable } from '@/lib/ai-service';
+import { cn } from '@/lib/utils';
 
 export interface InterviewPrepData {
     generatedJd: string;
@@ -18,6 +21,7 @@ interface InterviewPrepFormProps {
     onBack: () => void;
     loading?: boolean;
     category?: string; // Position category for role-based templates
+    positionName?: string;
 }
 
 export function InterviewPrepForm({
@@ -27,26 +31,71 @@ export function InterviewPrepForm({
     onBack,
     loading = false,
     category,
+    positionName,
 }: InterviewPrepFormProps) {
     const [generating, setGenerating] = useState(false);
+    const [usedAI, setUsedAI] = useState(false);
 
     const handleGenerateInterviewPrep = async () => {
         setGenerating(true);
 
-        // Simulate AI processing delay
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        try {
+            // Use smart generation - AI first, then templates
+            const result = await smartGenerateInterviewPrep(
+                data.generatedJd,
+                {
+                    positionName: positionName || 'Position',
+                    category: category || 'General',
+                },
+                () => generateCustomizedInterviewPrep(category || 'General')
+            );
 
-        // Generate role-based interview prep using templates
-        const customizedPrep = generateCustomizedInterviewPrep(category || 'General');
+            setUsedAI(result.usedAI);
+            onChange({ ...data, interviewPrepDoc: result.content });
+        } catch (err) {
+            // If AI fails, fall back to templates
+            const fallback = generateCustomizedInterviewPrep(category || 'General');
+            onChange({ ...data, interviewPrepDoc: fallback });
+            setUsedAI(false);
+        }
 
-        onChange({ ...data, interviewPrepDoc: customizedPrep });
         setGenerating(false);
     };
 
     const canFinish = data.interviewPrepDoc.trim() !== '';
+    const aiAvailable = isAIAvailable();
 
     return (
         <div className="space-y-6">
+            {/* AI Status Banner */}
+            <div className={cn(
+                "flex items-center justify-between p-3 rounded-lg border",
+                aiAvailable
+                    ? "bg-emerald-500/10 border-emerald-500/30"
+                    : "bg-amber-500/10 border-amber-500/30"
+            )}>
+                <div className="flex items-center gap-2">
+                    {aiAvailable ? (
+                        <>
+                            <Bot className="h-4 w-4 text-emerald-600" />
+                            <span className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                                Gemini AI Connected
+                            </span>
+                        </>
+                    ) : (
+                        <>
+                            <Cpu className="h-4 w-4 text-amber-600" />
+                            <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                                Using Smart Templates
+                            </span>
+                        </>
+                    )}
+                </div>
+                <Badge variant="secondary" className="text-xs">
+                    {aiAvailable ? 'AI-Powered' : 'Template-Based'}
+                </Badge>
+            </div>
+
             {/* Generated JD Display */}
             <DocumentPreviewInline
                 title="Job Description"
@@ -65,7 +114,10 @@ export function InterviewPrepForm({
                             <div>
                                 <h4 className="font-semibold">Interview Preparation</h4>
                                 <p className="text-sm text-muted-foreground">
-                                    Generate interview questions and evaluation criteria
+                                    {aiAvailable
+                                        ? 'AI-generated questions tailored to this role'
+                                        : 'Smart template-based interview guide'
+                                    }
                                 </p>
                             </div>
                         </div>
@@ -78,12 +130,12 @@ export function InterviewPrepForm({
                             {generating ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Generating...
+                                    {aiAvailable ? 'AI Generating...' : 'Generating...'}
                                 </>
                             ) : data.interviewPrepDoc ? (
                                 <>
                                     <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />
-                                    Generated
+                                    Generated {usedAI && <Sparkles className="ml-1 h-3 w-3 text-amber-500" />}
                                 </>
                             ) : (
                                 <>
@@ -98,11 +150,21 @@ export function InterviewPrepForm({
 
             {/* Generated Interview Prep Display */}
             {data.interviewPrepDoc && (
-                <DocumentPreviewInline
-                    title="Interview Preparation Document"
-                    content={data.interviewPrepDoc}
-                    isGenerated={true}
-                />
+                <div className="relative">
+                    {usedAI && (
+                        <Badge
+                            className="absolute -top-2 right-4 z-10 bg-gradient-to-r from-violet-500 to-purple-500 text-white"
+                        >
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            AI Generated
+                        </Badge>
+                    )}
+                    <DocumentPreviewInline
+                        title="Interview Preparation Document"
+                        content={data.interviewPrepDoc}
+                        isGenerated={true}
+                    />
+                </div>
             )}
 
             {/* Success Message */}
