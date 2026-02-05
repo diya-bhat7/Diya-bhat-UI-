@@ -1,49 +1,59 @@
 /**
  * AuthLogo - Straatix Partners logo for authentication pages
- * Uses the dark blue logo design with white text
+ * Professional horizontal dark blue design matching the brand
  */
 export function AuthLogo({ size = 'lg' }: { size?: 'sm' | 'md' | 'lg' }) {
-    const sizeClasses = {
-        sm: 'h-12',
-        md: 'h-16',
-        lg: 'h-24',
+    const sizeConfig = {
+        sm: { height: 'h-12', padding: 'px-4 py-2', iconSize: 'text-base', textSize: 'text-xs', gap: 'gap-2' },
+        md: { height: 'h-16', padding: 'px-6 py-3', iconSize: 'text-xl', textSize: 'text-sm', gap: 'gap-3' },
+        lg: { height: 'h-20', padding: 'px-8 py-4', iconSize: 'text-2xl', textSize: 'text-base', gap: 'gap-4' },
     };
+
+    const config = sizeConfig[size];
 
     return (
         <div
-            className={`${sizeClasses[size]} w-auto flex items-center justify-center rounded-xl overflow-hidden shadow-lg`}
-            style={{ aspectRatio: '16/9' }}
+            className={`${config.height} rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300`}
+            style={{
+                background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)'
+            }}
         >
-            <div
-                className="h-full w-full flex items-center justify-center px-6 py-4"
-                style={{ backgroundColor: '#0f172a' }}
-            >
-                <div className="flex items-center gap-3">
-                    {/* S/P Icon */}
-                    <div className="flex flex-col items-center text-white font-light text-lg leading-none">
-                        <span className="tracking-wider" style={{ fontFamily: 'serif', fontStyle: 'italic' }}>S</span>
-                        <div className="w-4 h-px bg-white/60 my-0.5" />
-                        <span className="tracking-wider" style={{ fontFamily: 'serif', fontStyle: 'italic' }}>P</span>
-                    </div>
+            <div className={`h-full flex items-center ${config.padding} ${config.gap}`}>
+                {/* S/P Monogram */}
+                <div className="flex flex-col items-center justify-center leading-none">
+                    <span
+                        className={`${config.iconSize} text-white font-light tracking-wide`}
+                        style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
+                    >
+                        S
+                    </span>
+                    <div className="w-5 h-px bg-white/50 my-0.5" />
+                    <span
+                        className={`${config.iconSize} text-white font-light tracking-wide`}
+                        style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
+                    >
+                        P
+                    </span>
+                </div>
 
-                    {/* Divider */}
-                    <div className="w-px h-10 bg-white/40" />
+                {/* Vertical Divider */}
+                <div className="w-px h-10 bg-white/30" />
 
-                    {/* Text */}
-                    <div className="flex flex-col text-white">
-                        <span
-                            className="text-lg tracking-[0.3em] font-light"
-                            style={{ fontFamily: 'system-ui, sans-serif' }}
-                        >
-                            STRAATIX
-                        </span>
-                        <span
-                            className="text-lg tracking-[0.3em] font-light"
-                            style={{ fontFamily: 'system-ui, sans-serif' }}
-                        >
-                            PARTNERS
-                        </span>
-                    </div>
+                {/* Brand Text */}
+                <div className="flex flex-col leading-tight">
+                    <span
+                        className={`${config.textSize} text-white font-light tracking-[0.25em]`}
+                        style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+                    >
+                        STRAATIX
+                    </span>
+                    <span
+                        className={`${config.textSize} text-white font-light tracking-[0.25em]`}
+                        style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+                    >
+                        PARTNERS
+                    </span>
                 </div>
             </div>
         </div>
