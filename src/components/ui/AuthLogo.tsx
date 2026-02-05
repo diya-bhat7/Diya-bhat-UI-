@@ -1,29 +1,29 @@
 /**
  * AuthLogo - Straatix Partners logo for authentication pages
- * Elegant design matching the brand identity
+ * Exact match to brand identity: S/P monogram with diagonal slash
  */
 export function AuthLogo({ size = 'lg' }: { size?: 'sm' | 'md' | 'lg' }) {
     const sizeConfig = {
         sm: {
-            container: 'h-14 px-5',
-            monogram: 'text-lg',
-            dividerH: 'h-6',
-            text: 'text-[10px]',
-            spacing: 'tracking-[0.2em]'
+            container: 'py-4 px-6',
+            monogramSize: 'text-3xl',
+            textSize: 'text-[11px]',
+            dividerH: 'h-10',
+            gap: 'gap-4'
         },
         md: {
-            container: 'h-16 px-6',
-            monogram: 'text-xl',
-            dividerH: 'h-7',
-            text: 'text-xs',
-            spacing: 'tracking-[0.2em]'
+            container: 'py-5 px-8',
+            monogramSize: 'text-4xl',
+            textSize: 'text-xs',
+            dividerH: 'h-12',
+            gap: 'gap-5'
         },
         lg: {
-            container: 'h-[72px] px-8',
-            monogram: 'text-2xl',
-            dividerH: 'h-8',
-            text: 'text-sm',
-            spacing: 'tracking-[0.25em]'
+            container: 'py-6 px-10',
+            monogramSize: 'text-5xl',
+            textSize: 'text-sm',
+            dividerH: 'h-14',
+            gap: 'gap-6'
         },
     };
 
@@ -31,42 +31,57 @@ export function AuthLogo({ size = 'lg' }: { size?: 'sm' | 'md' | 'lg' }) {
 
     return (
         <div
-            className={`${config.container} rounded-xl inline-flex items-center gap-4`}
+            className={`${config.container} rounded-lg inline-flex items-center ${config.gap}`}
             style={{
-                background: '#0f172a',
-                boxShadow: '0 10px 40px -10px rgba(15, 23, 42, 0.5)'
+                backgroundColor: '#0f172a'
             }}
         >
-            {/* S/P Monogram - Stacked Style */}
-            <div className="flex flex-col items-center justify-center leading-[0.9]">
+            {/* S/P Monogram - Crossed/Overlapping Style */}
+            <div className="relative flex items-center justify-center">
                 <span
-                    className={`${config.monogram} text-white`}
-                    style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic' }}
+                    className={`${config.monogramSize} text-white leading-none`}
+                    style={{
+                        fontFamily: 'Georgia, "Times New Roman", serif',
+                        fontStyle: 'italic',
+                        fontWeight: 300
+                    }}
                 >
                     S
                 </span>
-                <div className="w-4 h-[1px] bg-white/50 my-[2px]" />
                 <span
-                    className={`${config.monogram} text-white`}
-                    style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic' }}
+                    className={`${config.monogramSize} text-white/70 leading-none -mx-1`}
+                    style={{
+                        fontFamily: 'Georgia, "Times New Roman", serif',
+                        fontWeight: 300
+                    }}
+                >
+                    /
+                </span>
+                <span
+                    className={`${config.monogramSize} text-white leading-none`}
+                    style={{
+                        fontFamily: 'Georgia, "Times New Roman", serif',
+                        fontStyle: 'italic',
+                        fontWeight: 300
+                    }}
                 >
                     P
                 </span>
             </div>
 
             {/* Vertical Divider */}
-            <div className={`w-[1px] ${config.dividerH} bg-white/30`} />
+            <div className={`w-px ${config.dividerH} bg-white/40`} />
 
             {/* Brand Text */}
-            <div className="flex flex-col justify-center leading-tight">
+            <div className="flex flex-col justify-center">
                 <span
-                    className={`${config.text} ${config.spacing} text-white font-normal`}
+                    className={`${config.textSize} text-white font-normal tracking-[0.3em] leading-relaxed`}
                     style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
                 >
                     STRAATIX
                 </span>
                 <span
-                    className={`${config.text} ${config.spacing} text-white font-normal`}
+                    className={`${config.textSize} text-white font-normal tracking-[0.3em] leading-relaxed`}
                     style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
                 >
                     PARTNERS
