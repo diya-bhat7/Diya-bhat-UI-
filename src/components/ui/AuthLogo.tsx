@@ -21,16 +21,21 @@ export function AuthLogo({ size = 'lg' }: { size?: 'sm' | 'md' | 'lg' }) {
         >
             <div className={`h-full flex items-center ${config.padding} ${config.gap}`}>
                 {/* S/P Monogram */}
-                <div className="flex flex-col items-center justify-center leading-none">
+                <div className="flex items-center justify-center leading-none">
                     <span
-                        className={`${config.iconSize} text-white font-light tracking-wide`}
+                        className={`${config.iconSize} text-white font-light`}
                         style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
                     >
                         S
                     </span>
-                    <div className="w-5 h-px bg-white/50 my-0.5" />
                     <span
-                        className={`${config.iconSize} text-white font-light tracking-wide`}
+                        className={`${config.iconSize} text-white/60 font-light mx-0.5`}
+                        style={{ fontFamily: 'Georgia, serif' }}
+                    >
+                        /
+                    </span>
+                    <span
+                        className={`${config.iconSize} text-white font-light`}
                         style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
                     >
                         P
