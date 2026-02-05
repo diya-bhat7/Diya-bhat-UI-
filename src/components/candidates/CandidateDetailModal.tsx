@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { format } from 'date-fns';
 import {
     Dialog,
@@ -9,8 +10,17 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { CandidateStatusBadge, CandidateStatus } from './CandidateStatusBadge';
 import { Candidate } from './CandidateCard';
+import { InterviewScorecard, ScorecardSummary } from './InterviewScorecard';
+import { useInterviewScorecards, INTERVIEW_ROUNDS } from '@/hooks/useInterviewScorecards';
 import {
     Mail,
     Phone,
@@ -24,7 +34,13 @@ import {
     ExternalLink,
     User,
     StickyNote,
+    ClipboardCheck,
+    Plus,
+    TrendingUp,
+    ChevronDown,
+    ChevronUp,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 
 interface CandidateDetailModalProps {
@@ -49,6 +65,14 @@ const statusColors: Record<CandidateStatus, string> = {
     rejected: 'bg-red-500/10 border-red-500/30',
 };
 
+// Score color helper
+function getScoreColor(score: number): string {
+    if (score >= 80) return 'text-emerald-500';
+    if (score >= 60) return 'text-amber-500';
+    if (score >= 40) return 'text-orange-500';
+    return 'text-red-500';
+}
+
 export function CandidateDetailModal({
     candidate,
     open,
@@ -57,6 +81,17 @@ export function CandidateDetailModal({
     onDelete,
     onStatusChange,
 }: CandidateDetailModalProps) {
+    const [showScorecardForm, setShowScorecardForm] = useState(false);
+    const [selectedRound, setSelectedRound] = useState<string>(INTERVIEW_ROUNDS[0]);
+    const [expandedScorecards, setExpandedScorecards] = useState(false);
+
+    const {
+        scorecards,
+        saveScorecard,
+        averageScore,
+        totalRounds
+    } = useInterviewScorecards(candidate?.id || null);
+
     if (!candidate) return null;
 
     const initials = candidate.name
@@ -71,9 +106,9 @@ export function CandidateDetailModal({
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogContent className="max-w-lg p-0 overflow-hidden">
+            <DialogContent className="max-w-lg max-h-[90vh] p-0 overflow-hidden flex flex-col">
                 {/* Header with gradient accent */}
-                <div className={`p-6 border-b ${statusColors[candidate.status]}`}>
+                <div className={`p-6 border-b ${statusColors[candidate.status]} flex-shrink-0`}>
                     <div className="flex items-start gap-4">
                         <Avatar className="h-16 w-16 ring-4 ring-background shadow-lg">
                             <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
@@ -92,7 +127,21 @@ export function CandidateDetailModal({
                             </DialogHeader>
                             <div className="flex items-center gap-2 mt-3">
                                 <CandidateStatusBadge status={candidate.status} />
-                                {candidate.rating && candidate.rating > 0 && (
+
+                                {/* Show Interview Score Badge if available */}
+                                {averageScore !== null && (
+                                    <div className={cn(
+                                        "flex items-center gap-1 px-2 py-1 rounded-full bg-background/80 border",
+                                        getScoreColor(averageScore)
+                                    )}>
+                                        <TrendingUp className="h-3.5 w-3.5" />
+                                        <span className="text-xs font-bold">{averageScore}%</span>
+                                        <span className="text-[10px] text-muted-foreground">({totalRounds})</span>
+                                    </div>
+                                )}
+
+                                {/* Legacy star rating */}
+                                {candidate.rating && candidate.rating > 0 && !averageScore && (
                                     <div className="flex items-center gap-0.5 bg-yellow-500/15 px-2 py-1 rounded-full">
                                         {[...Array(5)].map((_, i) => (
                                             <Star
@@ -110,8 +159,8 @@ export function CandidateDetailModal({
                     </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-6 space-y-6">
+                {/* Content - Scrollable */}
+                <div className="p-6 space-y-6 overflow-y-auto flex-1">
                     {/* Contact Info */}
                     <div className="space-y-3">
                         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
@@ -159,7 +208,92 @@ export function CandidateDetailModal({
                         </div>
                     </div>
 
-                    {/* Notes */}
+                    {/* Interview Scorecards Section */}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                <ClipboardCheck className="h-4 w-4" />
+                                Interview Evaluation
+                            </h3>
+                            {!showScorecardForm && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setShowScorecardForm(true)}
+                                    className="h-7 text-xs"
+                                >
+                                    <Plus className="h-3 w-3 mr-1" />
+                                    Add Round
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Scorecard Form */}
+                        {showScorecardForm && (
+                            <div className="space-y-3">
+                                <Select value={selectedRound} onValueChange={setSelectedRound}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select round type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {INTERVIEW_ROUNDS.map((round) => (
+                                            <SelectItem key={round} value={round}>
+                                                {round}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <InterviewScorecard
+                                    roundName={selectedRound}
+                                    onSave={(data) => {
+                                        saveScorecard(data);
+                                        setShowScorecardForm(false);
+                                    }}
+                                    onCancel={() => setShowScorecardForm(false)}
+                                />
+                            </div>
+                        )}
+
+                        {/* Existing Scorecards */}
+                        {!showScorecardForm && scorecards.length > 0 && (
+                            <div className="space-y-2">
+                                {(expandedScorecards ? scorecards : scorecards.slice(0, 2)).map((sc) => (
+                                    <ScorecardSummary key={sc.id} data={sc} />
+                                ))}
+                                {scorecards.length > 2 && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setExpandedScorecards(!expandedScorecards)}
+                                        className="w-full text-xs text-muted-foreground"
+                                    >
+                                        {expandedScorecards ? (
+                                            <>
+                                                <ChevronUp className="h-3 w-3 mr-1" />
+                                                Show Less
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ChevronDown className="h-3 w-3 mr-1" />
+                                                Show {scorecards.length - 2} More
+                                            </>
+                                        )}
+                                    </Button>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Empty state */}
+                        {!showScorecardForm && scorecards.length === 0 && (
+                            <div className="text-center py-6 text-muted-foreground">
+                                <ClipboardCheck className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                                <p className="text-xs">No interview evaluations yet</p>
+                                <p className="text-[10px]">Click "Add Round" to rate this candidate</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Notes (Legacy) */}
                     {candidate.notes && (
                         <div className="space-y-3">
                             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
@@ -171,8 +305,6 @@ export function CandidateDetailModal({
                             </div>
                         </div>
                     )}
-
-
 
                     {/* Quick Status Change */}
                     <div className="space-y-3">
