@@ -11,9 +11,11 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
     Building2, Globe, Linkedin, MapPin, Mail, User, Briefcase,
-    Loader2, ArrowLeft, Save, Pencil, X, ImagePlus, Trash2
+    Loader2, ArrowLeft, Save, Pencil, X, ImagePlus, Trash2, Upload
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useMemo } from 'react';
 
 const LOCATIONS = [
     'Hyderabad',
@@ -51,6 +53,16 @@ export default function Profile() {
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [uploadingLogo, setUploadingLogo] = useState(false);
     const [currentLogoUrl, setCurrentLogoUrl] = useState<string | null>(null);
+
+    const initials = useMemo(() => {
+        if (!formData.contactName) return '';
+        return formData.contactName
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+    }, [formData.contactName]);
 
     // Redirect to login if not authenticated
     if (!authLoading && !user) {
