@@ -2,11 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AuthRedirect } from "@/components/AuthRedirect";
 import { Suspense, lazy } from "react";
 
 // Lazy load pages for code splitting
@@ -59,7 +60,7 @@ const App = () => (
               <Suspense fallback={<PageLoader />}>
                 <ErrorBoundary>
                   <Routes>
-                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/" element={<AuthRedirect />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
