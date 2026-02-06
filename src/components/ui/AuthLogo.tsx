@@ -4,9 +4,9 @@
  */
 export function AuthLogo({ size = 'lg' }: { size?: 'sm' | 'md' | 'lg' }) {
     const sizeClasses = {
-        sm: 'h-12',
-        md: 'h-16',
-        lg: 'h-20',
+        sm: 'h-16',
+        md: 'h-24',
+        lg: 'h-32',
     };
 
     return (
