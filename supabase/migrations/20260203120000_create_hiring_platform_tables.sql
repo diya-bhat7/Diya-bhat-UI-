@@ -5,6 +5,7 @@ CREATE TABLE public.companies (
   company_name TEXT NOT NULL,
   company_website TEXT,
   company_linkedin TEXT,
+  company_logo TEXT,
   office_locations TEXT[] DEFAULT '{}',
   contact_email TEXT NOT NULL,
   contact_title TEXT,
