@@ -158,12 +158,24 @@ export default function Profile() {
         e.preventDefault();
 
         try {
+            let logoUrl = currentLogoUrl;
+
+            // 1. Upload new logo if selected
+            if (logoFile) {
+                const uploadedUrl = await uploadLogo();
+                if (uploadedUrl) {
+                    logoUrl = uploadedUrl;
+                }
+            }
+
+            // 2. Update company record
             if (company) {
                 await updateCompany.mutateAsync({
                     id: company.id,
                     company_name: formData.companyName,
                     company_website: formData.companyWebsite || null,
                     company_linkedin: formData.companyLinkedin || null,
+                    company_logo: logoUrl,
                     office_locations: formData.officeLocations,
                     contact_title: formData.contactTitle || null,
                     contact_name: formData.contactName,
@@ -173,6 +185,7 @@ export default function Profile() {
                     company_name: formData.companyName,
                     company_website: formData.companyWebsite || null,
                     company_linkedin: formData.companyLinkedin || null,
+                    company_logo: logoUrl,
                     office_locations: formData.officeLocations,
                     contact_email: formData.contactEmail,
                     contact_title: formData.contactTitle || null,
@@ -185,6 +198,8 @@ export default function Profile() {
                 description: `Your company profile has been ${company ? 'saved' : 'created'} successfully.`,
             });
             setIsEditing(false);
+            setLogoFile(null);
+            setLogoPreview(null);
         } catch (error: any) {
             toast({
                 title: company ? 'Update failed' : 'Creation failed',
@@ -241,6 +256,28 @@ export default function Profile() {
 
             <CardContent className="space-y-6">
                 {/* Company Information Section */}
+                {/* Company Logo Display */}
+                <div className="flex items-center gap-4 py-2">
+                    <Avatar className="h-20 w-20 ring-2 ring-primary/10">
+                        {currentLogoUrl ? (
+                            <AvatarImage
+                                src={currentLogoUrl}
+                                alt={formData.companyName}
+                                className="object-contain p-1"
+                            />
+                        ) : null}
+                        <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
+                            {initials}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="space-y-1">
+                        <h4 className="text-sm font-medium">Company Logo</h4>
+                        <p className="text-xs text-muted-foreground">
+                            This logo appears in your dashboard header and documents.
+                        </p>
+                    </div>
+                </div>
+
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">
@@ -372,6 +409,79 @@ export default function Profile() {
                 </CardHeader>
 
                 <CardContent className="space-y-6">
+                    {/* Company Logo Upload Section */}
+                    <div className="space-y-4">
+                        <Label className="flex items-center gap-2">
+                            <ImagePlus className="h-4 w-4" />
+                            Company Logo
+                        </Label>
+                        <div className="flex items-center gap-6">
+                            <div className="relative group">
+                                <Avatar className="h-24 w-24 ring-4 ring-primary/5">
+                                    {logoPreview || currentLogoUrl ? (
+                                        <AvatarImage
+                                            src={logoPreview || currentLogoUrl || ''}
+                                            className="object-contain p-1.5"
+                                        />
+                                    ) : null}
+                                    <AvatarFallback className="bg-muted text-muted-foreground text-2xl">
+                                        <Building2 className="h-10 w-10" />
+                                    </AvatarFallback>
+                                </Avatar>
+                                {isEditing && (
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="absolute inset-0 bg-black/20 rounded-full" />
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => logoInputRef.current?.click()}
+                                        disabled={uploadingLogo}
+                                        className="h-9"
+                                    >
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        Upload Logo
+                                    </Button>
+                                    {(logoPreview || currentLogoUrl) && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => {
+                                                if (logoPreview) {
+                                                    handleRemoveLogo();
+                                                } else {
+                                                    setCurrentLogoUrl(null);
+                                                }
+                                            }}
+                                            className="h-9 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    Recommended: Square PNG or SVG, max 2MB
+                                </p>
+                            </div>
+                            <input
+                                type="file"
+                                ref={logoInputRef}
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleLogoSelect}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="my-6 border-t" />
+
                     {/* Company Information Section */}
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
