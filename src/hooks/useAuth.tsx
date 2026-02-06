@@ -13,6 +13,7 @@ interface AuthContextType {
     loading: boolean;
     signUp: (email: string, password: string, companyData: Omit<Company, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<{ error: Error | null }>;
     signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+    signInWithGoogle: () => Promise<{ error: Error | null }>;
     signOut: () => Promise<void>;
     refreshCompany: () => Promise<void>;
 }
@@ -115,15 +116,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try {
                 // Add timeout to prevent hanging if Supabase connection fails
                 const timeoutPromise = new Promise<{ data: { session: null }, error: Error }>((resolve) =>
-                    setTimeout(() => resolve({ 
-                        data: { session: null }, 
-                        error: new Error('Auth initialization timed out after 5s') 
+                    setTimeout(() => resolve({
+                        data: { session: null },
+                        error: new Error('Auth initialization timed out after 5s')
                     }), 5000)
                 );
 
                 const sessionPromise = supabase.auth.getSession();
                 const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]);
-                
+
                 if (error) {
                     console.error('Error getting session:', error);
                     setLoading(false);
@@ -208,6 +209,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setCompany(null);
     }, []);
 
+    const signInWithGoogle = useCallback(async () => {
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/dashboard`,
+                },
+            });
+            if (error) throw error;
+            return { error: null };
+        } catch (error) {
+            return { error: error as Error };
+        }
+    }, []);
+
     // Memoize context value to prevent unnecessary re-renders
     const value = useMemo(() => ({
         user,
@@ -216,9 +232,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         signUp,
         signIn,
+        signInWithGoogle,
         signOut,
         refreshCompany,
-    }), [user, session, company, loading, signUp, signIn, signOut, refreshCompany]);
+    }), [user, session, company, loading, signUp, signIn, signInWithGoogle, signOut, refreshCompany]);
 
     return (
         <AuthContext.Provider value={value}>
