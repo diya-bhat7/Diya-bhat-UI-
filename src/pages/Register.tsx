@@ -214,7 +214,7 @@ export default function Register() {
                                 <div className="space-y-2">
                                     <Label className="flex items-center gap-2">
                                         <ImageIcon className="h-4 w-4" />
-                                        Company Logo
+                                        Company Logo (Optional)
                                     </Label>
                                     <div className="flex items-center gap-4">
                                         {logoPreview ? (
